@@ -1,1 +1,924 @@
-
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Simulação de Incidente de Ransomware</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0d47a1;
+            --primary-light: #5472d3;
+            --primary-dark: #002171;
+            --secondary: #00acc1;
+            --success: #00c853;
+            --warning: #ffab00;
+            --danger: #d50000;
+            --light-bg: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --border-color: #e0e0e0;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .section {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+        }
+        
+        .section-title {
+            color: var(--primary-dark);
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 10px;
+        }
+        
+        .section-title i {
+            margin-right: 12px;
+            color: var(--primary);
+        }
+        
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .overview-card {
+            background-color: var(--light-bg);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+        
+        .overview-card:hover {
+            box-shadow: var(--shadow);
+            transform: translateX(5px);
+        }
+        
+        .overview-card h3 {
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+            font-size: 1.3rem;
+        }
+        
+        .actors-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .actor-card {
+            background-color: var(--light-bg);
+            padding: 18px;
+            border-radius: 8px;
+            border-top: 4px solid var(--secondary);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .actor-card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-5px);
+        }
+        
+        .actor-card h4 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .timeline-container {
+            position: relative;
+            margin: 30px 0;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--primary-light), var(--secondary));
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+            border: 3px solid white;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-item.active::before {
+            background-color: var(--warning);
+            transform: scale(1.2);
+        }
+        
+        .timeline-item.completed::before {
+            background-color: var(--success);
+        }
+        
+        .timeline-content {
+            background-color: var(--light-bg);
+            padding: 18px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-content:hover {
+            box-shadow: var(--shadow);
+        }
+        
+        .timeline-content h4 {
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .timeline-content .actors {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        
+        .phase-details {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border-color);
+        }
+        
+        .phase-details.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .phase-details h5 {
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .phase-details h5 i {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+        
+        .phase-details ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .phase-details li {
+            margin-bottom: 6px;
+            position: relative;
+            padding-left: 5px;
+        }
+        
+        .phase-details li::before {
+            content: '•';
+            color: var(--primary);
+            font-weight: bold;
+            position: absolute;
+            left: -15px;
+        }
+        
+        .status-indicators {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            background-color: var(--light-bg);
+            padding: 8px 15px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .status-indicator span {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .status-not-started {
+            background-color: var(--border-color);
+        }
+        
+        .status-in-progress {
+            background-color: var(--warning);
+        }
+        
+        .status-completed {
+            background-color: var(--success);
+        }
+        
+        .control-panel {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+        
+        .control-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .control-btn i {
+            margin-right: 8px;
+        }
+        
+        .control-btn.secondary {
+            background-color: var(--secondary);
+        }
+        
+        .control-btn.secondary:hover {
+            background-color: #00838f;
+        }
+        
+        .progress-container {
+            margin: 25px 0;
+            background-color: var(--light-bg);
+            border-radius: 10px;
+            padding: 5px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .progress-bar {
+            height: 15px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 8px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .overview-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .actors-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline {
+                padding-left: 20px;
+            }
+            
+            .timeline-item::before {
+                left: -20px;
+            }
+            
+            .control-panel {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .control-btn {
+                width: 80%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="header">
+            <h1><i class="fas fa-shield-alt"></i> Dashboard de Simulação de Incidente de Ransomware</h1>
+            <p>Sistema Interativo para Treinamento de Resposta a Incidentes Graves</p>
+        </header>
+        
+        <section class="section">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Visão Geral do Incidente
+            </h2>
+            <div class="overview-grid">
+                <div class="overview-card">
+                    <h3><i class="fas fa-bullseye"></i> Objetivo da Simulação</h3>
+                    <p>Treinar todos os servidores envolvidos na resposta a incidentes graves de segurança, garantindo que compreendam suas funções e responsabilidades, pratiquem a sequência de eventos, e testem a eficácia dos protocolos de comunicação e ação.</p>
+                </div>
+                <div class="overview-card">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Cenário Inicial</h3>
+                    <p>Um funcionário, simulando um clique em um e-mail de phishing, desencadeia a execução de um ransomware na rede corporativa. O malware começa a se espalhar rapidamente, criptografando arquivos em servidores críticos.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2 class="section-title">
+                <i class="fas fa-users"></i>
+                Atores Envolvidos e Suas Funções
+            </h2>
+            <div class="actors-container">
+                <div class="actor-card">
+                    <h4><i class="fas fa-user"></i> Usuário Final</h4>
+                    <p>Ponto de entrada para detecção inicial</p>
+                </div>
+                <div class="actor-card">
+                    <h4><i class="fas fa-user-tie"></i> Chefe da Central de Serviços</h4>
+                    <p>Ponto de entrada, primeiro decisor crítico e declarador do "estado de alerta"</p>
+                </div>
+                <div class="actor-card">
+                    <h4><i class="fas fa-headset"></i> CS (Central de Serviços)</h4>
+                    <p>Responsável pela documentação, registro formal do chamado mestre, comunicação interna e primeiro nível de atendimento</p>
+                </div>
+                <div class="actor-card">
+                    <h4><i class="fas fa-user-shield"></i> Líder da Equipe de Incidentes</h4>
+                    <p>Coordenador estratégico, mobiliza equipes e designa o responsável técnico</p>
+                </div>
+                <div class="actor-card">
+                    <h4><i class="fas fa-clipboard-list"></i> Secretaria de TI</h4>
+                    <p>Comunicação executiva, registro de marcos temporais, decisões gerenciais</p>
+                </div>
+                <div class="actor-card">
+                    <h4><i class="fas fa-tools"></i> ETIR (Equipe Técnica)</h4>
+                    <p>Equipe técnica de linha de frente, realiza análise, contenção, erradicação e recuperação</p>
+                </div>
+                <div class="actor-card">
+                    <h4><i class="fas fa-building"></i> Diretoria / Gabinete</h4>
+                    <p>Gestão de alto nível, recebe informações consolidadas e relatório pós-incidente</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2 class="section-title">
+                <i class="fas fa-stream"></i>
+                Linha do Tempo do Incidente
+            </h2>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">Fase 1 de 13 (7.7%)</div>
+            
+            <div class="status-indicators">
+                <div class="status-indicator">
+                    <span class="status-not-started"></span>
+                    <span>Não Iniciado</span>
+                </div>
+                <div class="status-indicator">
+                    <span class="status-in-progress"></span>
+                    <span>Em Andamento</span>
+                </div>
+                <div class="status-indicator">
+                    <span class="status-completed"></span>
+                    <span>Concluído</span>
+                </div>
+            </div>
+            
+            <div class="timeline-container">
+                <div class="timeline">
+                    <div class="timeline-item" data-phase="1">
+                        <div class="timeline-content">
+                            <h4>1. Início do Incidente</h4>
+                            <div class="actors"><i class="fas fa-user"></i> <i class="fas fa-headset"></i> Usuário Final / Central de Serviços</div>
+                            <p>Usuários relatam que não conseguem abrir sistemas e veem uma nota de resgate.</p>
+                            <div class="phase-details">
+                                <h5><i class="fas fa-tasks"></i> Ação:</h5>
+                                <ul>
+                                    <li>Usuários ligam para a Central de Serviços relatando o problema</li>
+                                    <li>Ferramentas de segurança disparam alertas críticos</li>
+                                    <li>Central de Serviços identifica padrão e escalona ao Chefe da Central</li>
+                                </ul>
+                                <h5><i class="fas fa-theater-masks"></i> Simulação:</h5>
+                                <ul>
+                                    <li>Usuários simulados entram em contato com a Central de Serviços</li>
+                                    <li>Alertas críticos são simulados</li>
+                                    <li>Central de Serviços identifica padrão e escalona ao Chefe da Central</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item" data-phase="2">
+                        <div class="timeline-content">
+                            <h4>2. Confirmação e Tomada de Decisão Crítica</h4>
+                            <div class="actors"><i class="fas fa-user-tie"></i> Chefe da Central de Serviços</div>
+                            <p>O Chefe da Central de Serviços recebe os chamados e confirma a gravidade do incidente.</p>
+                            <div class="phase-details">
+                                <h5><i class="fas fa-tasks"></i> Ação:</h5>
+                                <ul>
+                                    <li>Receber os chamados e confirmar a gravidade</li>
+                                    <li>Avaliar o impacto em servidores críticos</li>
+                                    <li>Classificar o incidente como grave em estado de emergência</li>
+                                </ul>
+                                <h5><i class="fas fa-theater-masks"></i> Simulação:</h5>
+                                <ul>
+                                    <li>Chefe da Central de Serviços é informado sobre múltiplos alertas</li>
+                                    <li>Avalia: "Incidente de segurança normal?" → "Não"</li>
+                                    <li>Avalia: "Incidente grave em estado de emergência?" → "Sim"</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item" data-phase="3">
+                        <div class="timeline-content">
+                            <h4>3. Declaração de Alerta e Comunicação Inicial</h4>
+                            <div class="actors"><i class="fas fa-user-tie"></i> Chefe da Central de Serviços</div>
+                            <p>Imediatamente, o Chefe da Central de Serviços declara o "estado de alerta".</p>
+                            <div class="phase-details">
+                                <h5><i class="fas fa-tasks"></i> Ação:</h5>
+                                <ul>
+                                    <li>Declarar formalmente o "estado de alerta"</li>
+                                    <li>Comunicar ao Líder da Equipe de Incidentes Graves</li>
+                                    <li>Informar a própria equipe para iniciar o registro</li>
+                                </ul>
+                                <h5><i class="fas fa-theater-masks"></i> Simulação:</h5>
+                                <ul>
+                                    <li>Envia comunicação formal de "estado de alerta"</li>
+                                    <li>Informa sua própria equipe (CS) para iniciar o registro</li>
+                                    <li>Emite comunicado de alerta minimalista</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item" data-phase="4">
+                        <div class="timeline-content">
+                            <h4>4. Registro Detalhado do Incidente</h4>
+                            <div class="actors"><i class="fas fa-headset"></i> CS - Central de Serviços</div>
+                            <p>A equipe de CS registra um chamado detalhado do incidente no sistema.</p>
+                            <div class="phase-details">
+                                <h5><i class="fas fa-tasks"></i> Ação:</h5>
+                                <ul>
+                                    <li>Registrar um chamado detalhado do incidente</li>
+                                    <li>Vincular todos os eventos relacionados</li>
+                                    <li>Classificar como crítico</li>
+                                </ul>
+                                <h5><i class="fas fa-theater-masks"></i> Simulação:</h5>
+                                <ul>
+                                    <li>Abrir um "chamado mestre" no sistema de gerenciamento</li>
+                                    <li>Preencher campos relevantes com informações iniciais</li>
+                                    <li>Classificar como "crítico" ou "grave em estado de emergência"</li>
+                                    <li>Ativar comunicação de crise para alta gestão</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item" data-phase="5">
+                        <div class="timeline-content">
+                            <h4>5. Mobilização e Designação de Responsável</h4>
+                            <div class="actors"><i class="fas fa-user-shield"></i> Líder da Equipe / <i class="fas fa-clipboard-list"></i> Secretaria de TI</div>
+                            <p>O Líder da Equipe de Incidentes Graves inicia a mobilização das equipes.</p>
+                            <div class="phase-details">
+                                <h5><i class="fas fa-tasks"></i> Ação:</h5>
+                                <ul>
+                                    <li>Receber a declaração de "estado de alerta"</li>
+                                    <li>Iniciar a mobilização das equipes</li>
+                                    <li>Designar o responsável técnico (interlocutor)</li>
+                                </ul>
+                                <h5><i class="fas fa-theater-masks"></i> Simulação:</h5>
+                                <ul>
+                                    <li>Designar um Analista de Segurança Sênior da ETIR como "interlocutor"</li>
+                                    <li>Secretaria de TI designa interlocutor para informar demais áreas</li>
+                                    <li>Realizar "Comunicação aos setores da TI" solicitando prontidão</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item" data-phase="6">
+                        <div class="timeline-content">
+                            <h4>6. Início da Medição de Desempenho</h4>
+                            <div class="actors"><i class="fas fa-clipboard-list"></i> Secretaria de TI</div>
+                            <p>A Secretaria de TI registra formalmente o horário de início do incidente.</p>
+                            <div class="phase-details">
+                                <h5><i class="fas fa-tasks"></i> Ação:</h5>
+                                <ul>
+                                    <li>Registrar formalmente o horário de início do incidente</li>
+                                    <li>Utilizar para métricas de desempenho (TTR - Time to Respond)</li>
+                                </ul>
+                                <h5><i class="fas fa-theater-masks"></i> Simulação:</h5>
+                                <ul>
+                                    <li>Marcar o "timestamp" do início do incidente no sistema</li>
+                                    <li>Utilizar para cálculo posterior do TTR</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item" data-phase="7">
+                        <div class="timeline-content">
+                            <h4>7. Análise, Avaliação de Criticidade e Medidas Iniciais</h4>
+                            <div class="actors"><i class="fas fa-tools"></i> ETIR / Segurança</div>
+                            <p>A ETIR realiza análise técnica profunda para identificar a natureza do ataque.</p>
+                            <div class="phase-details">
+                                <h5><i class="fas fa-tasks"></i> Ação:</h5>
+                                <ul>
+                                    <li>Realizar análise técnica profunda</li>
+                                    <li>Identificar natureza e escopo do ataque</li>
+                                    <li>Iniciar medidas focadas em contenção</li>
+                                </ul>
+                                <h5><i class="fas fa-theater-masks"></i> Simulação:</h5>
+                                <ul>
+                                    <li>Iniciar "Análise do incidente e informações"</li>
+                                    <li>Identificar tipo de ransomware e vetor de entrada</li>
+                                    <li>Realizar "Avaliar criticidade do incidente"</li>
+                                    <li>Tomar medidas iniciais como instrução para usuários desligarem computadores</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item" data-phase="8">
+                        <div class="timeline-content">
+                            <h4>8. Comunicação Contínua e Ações de Contenção</h4>
+                            <div class="actors"><i class="fas fa-tools"></i> ETIR / <i class="fas fa-clipboard-list"></i> Secretaria de TI</div>
+                            <p>A ETIR mantém comunicação sobre o progresso técnico e executa ações de contenção.</p>
+                            <div class="phase-details">
+                                <h5><i class="fas fa-tasks"></i> Ação:</h5>
+                                <ul>
+                                    <li>Manter comunicação com o Chefe da Central de Serviços</li>
+                                    <li>Executar ações de contenção</li>
+                                    <li>A Secretaria de TI avalia evolução e informa a Diretoria</li>
+                                </ul>
+                                <h5><i class="fas fa-theater-masks"></i> Simulação:</h5>
+                                <ul>
+                                    <li>ETIR comunica que ransomware está se espalhando</li>
+                                    <li>Isolar o servidor de arquivos da rede</li>
+                                    <li>Bloquear domínios de comando e controle no firewall</li>
+                                    <li>Identificar e desabilitar conta de usuário comprometida</li>
+                                    <li>Iniciar verificação de backups</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item" data-phase="9">
+                        <div class="timeline-content">
+                            <h4>9. Divisão do Fluxo (Ações Paralelas)</h4>
+                            <div class="actors"><i class="fas fa-sitemap"></i> Múltiplos atores</div>
+                            <p>As ações se dividem em três trilhas simultâneas.</p>
+                            <div class="phase-details">
+                                <h5><i class="fas fa-tasks"></i> Trilha 1 - Registro e Acompanhamento:</h5>
+                                <ul>
+                                    <li>Papel: CS - Central de Serviços</li>
+                                    <li>Manter chamado atualizado</li>
+                                    <li>Registrar todas as ações e comunicações</li>
+                                </ul>
+                                <h5><i class="fas fa-tasks"></i> Trilha 2 - Gestão Executiva:</h5>
+                                <ul>
+                                    <li>Papel: Secretaria de TI / Diretoria / Áreas de Negócio</li>
+                                    <li>Analisar impacto financeiro e de reputação</li>
+                                    <li>Avaliar necessidade de acionar seguro cibernético</li>
+                                </ul>
+                                <h5><i class="fas fa-tasks"></i> Trilha 3 - Mobilização Técnica:</h5>
+                                <ul>
+                                    <li>Papel: Secretaria de TI / ETIR / STR</li>
+                                    <li>Designar principais resolvedores</li>
+                                    <li>Emitir instruções claras para setores da TI</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item" data-phase="10">
+                        <div class="timeline-content">
+                            <h4>10. Resolução Técnica</h4>
+                            <div class="actors"><i class="fas fa-tools"></i> ETIR</div>
+                            <p>A ETIR executa as ações de erradicação e recuperação.</p>
+                            <div class="phase-details">
+                                <h5><i class="fas fa-tasks"></i> Ação:</h5>
+                                <ul>
+                                    <li>Executar ações de erradicação</li>
+                                    <li>Executar ações de recuperação</li>
+                                </ul>
+                                <h5><i class="fas fa-theater-masks"></i> Simulação:</h5>
+                                <ul>
+                                    <li>Finalizar isolamento dos segmentos de rede afetados</li>
+                                    <li>Analisa variante do ransomware e vulnerabilidades</li>
+                                    <li>Remover malware de todos os sistemas infectados</li>
+                                    <li>Iniciar restauração dos dados a partir de backups seguros</li>
+                                    <li>Tomar decisão de NÃO PAGAR O RESGATE</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item" data-phase="11">
+                        <div class="timeline-content">
+                            <h4>11. Fim da Contingência e Desmobilização</h4>
+                            <div class="actors"><i class="fas fa-tools"></i> ETIR / <i class="fas fa-clipboard-list"></i> Secretaria / <i class="fas fa-user-shield"></i> Líder</div>
+                            <p>A ETIR declara o fim do evento de contingência e as equipes são desmobilizadas.</p>
+                            <div class="phase-details">
+                                <h5><i class="fas fa-tasks"></i> Ação:</h5>
+                                <ul>
+                                    <li>Declarar o fim do evento de contingência</li>
+                                    <li>Desmobilizar as equipes</li>
+                                </ul>
+                                <h5><i class="fas fa-theater-masks"></i> Simulação:</h5>
+                                <ul>
+                                    <li>ETIR declara "Fim do evento de contingência"</li>
+                                    <li>Secretaria de TI inicia "Desmobilizar equipe de sustentação"</li>
+                                    <li>Líder da Equipe declara fim do "estado de alerta"</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item" data-phase="12">
+                        <div class="timeline-content">
+                            <h4>12. Encerramento do Chamado</h4>
+                            <div class="actors"><i class="fas fa-headset"></i> CS</div>
+                            <p>A equipe de CS formaliza a resolução e encerra o chamado mestre.</p>
+                            <div class="phase-details">
+                                <h5><i class="fas fa-tasks"></i> Ação:</h5>
+                                <ul>
+                                    <li>Formalizar a resolução</li>
+                                    <li>Encerrar o chamado mestre</li>
+                                </ul>
+                                <h5><i class="fas fa-theater-masks"></i> Simulação:</h5>
+                                <ul>
+                                    <li>Finalizar documentação no chamado</li>
+                                    <li>Alcançar status de "Incidente grave de segurança resolvido"</li>
+                                    <li>Comunicar aos usuários a restauração dos serviços</li>
+                                    <li>Iniciar processo de reset de senhas como precaução</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item" data-phase="13">
+                        <div class="timeline-content">
+                            <h4>13. Relatório Final e Lições Aprendidas</h4>
+                            <div class="actors"><i class="fas fa-building"></i> Diretoria / <i class="fas fa-users"></i> Todos</div>
+                            <p>A Diretoria recebe o relatório pós-incidente com análise final e lições aprendidas.</p>
+                            <div class="phase-details">
+                                <h5><i class="fas fa-tasks"></i> Ação:</h5>
+                                <ul>
+                                    <li>Receber relatório pós-incidente</li>
+                                    <li>Analisar causa raiz</li>
+                                    <li>Planejar melhorias nas defesas</li>
+                                </ul>
+                                <h5><i class="fas fa-theater-masks"></i> Simulação:</h5>
+                                <ul>
+                                    <li>Diretoria recebe "Resposta ao pedido de informação"</li>
+                                    <li>Agendar reunião de lições aprendidas (post-mortem)</li>
+                                    <li>Todos os envolvidos participam fornecendo feedback</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <button class="control-btn" id="prevPhase">
+                    <i class="fas fa-arrow-left"></i>
+                    Fase Anterior
+                </button>
+                <button class="control-btn secondary" id="nextPhase">
+                    Próxima Fase
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <button class="control-btn" id="resetSimulation">
+                    <i class="fas fa-redo"></i>
+                    Reiniciar Simulação
+                </button>
+            </div>
+        </section>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            const prevBtn = document.getElementById('prevPhase');
+            const nextBtn = document.getElementById('nextPhase');
+            const resetBtn = document.getElementById('resetSimulation');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            let currentPhase = 0;
+            
+            // Inicializar todos os itens como não iniciados
+            timelineItems.forEach(item => {
+                item.classList.add('not-started');
+            });
+            
+            // Atualizar barra de progresso
+            function updateProgressBar() {
+                const progress = ((currentPhase + 1) / timelineItems.length) * 100;
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `Fase ${currentPhase + 1} de ${timelineItems.length} (${progress.toFixed(1)}%)`;
+            }
+            
+            // Ativar fase
+            function activatePhase(phaseIndex) {
+                // Remover classe active de todos os itens
+                timelineItems.forEach(item => {
+                    item.classList.remove('active');
+                    const details = item.querySelector('.phase-details');
+                    if (details) {
+                        details.classList.remove('active');
+                    }
+                });
+                
+                // Adicionar classe active ao item atual
+                if (timelineItems[phaseIndex]) {
+                    timelineItems[phaseIndex].classList.add('active');
+                    const details = timelineItems[phaseIndex].querySelector('.phase-details');
+                    if (details) {
+                        details.classList.add('active');
+                    }
+                    
+                    // Marcar fases anteriores como concluídas
+                    for (let i = 0; i < phaseIndex; i++) {
+                        timelineItems[i].classList.remove('active');
+                        timelineItems[i].classList.add('completed');
+                    }
+                    
+                    // Marcar fases posteriores como não iniciadas
+                    for (let i = phaseIndex + 1; i < timelineItems.length; i++) {
+                        timelineItems[i].classList.remove('active', 'completed');
+                        timelineItems[i].classList.add('not-started');
+                    }
+                    
+                    currentPhase = phaseIndex;
+                    updateProgressBar();
+                    
+                    // Rolagem suave para o item ativo
+                    timelineItems[phaseIndex].scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }
+            }
+            
+            // Event listeners para botões
+            prevBtn.addEventListener('click', function() {
+                if (currentPhase > 0) {
+                    activatePhase(currentPhase - 1);
+                }
+            });
+            
+            nextBtn.addEventListener('click', function() {
+                if (currentPhase < timelineItems.length - 1) {
+                    activatePhase(currentPhase + 1);
+                }
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                currentPhase = 0;
+                activatePhase(0);
+            });
+            
+            // Event listeners para itens da timeline
+            timelineItems.forEach((item, index) => {
+                item.addEventListener('click', function() {
+                    activatePhase(index);
+                });
+            });
+            
+            // Ativar primeira fase
+            activatePhase(0);
+        });
+    </script>
+</body>
+</html>
