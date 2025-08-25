@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Simulação de Incidente de Ransomware</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #0d47a1;
@@ -71,6 +72,7 @@
             margin-bottom: 10px;
             position: relative;
             z-index: 1;
+            font-weight: 900;
         }
         
         .header p {
@@ -131,6 +133,7 @@
             color: var(--primary-dark);
             margin-bottom: 12px;
             font-size: 1.3rem;
+            font-weight: 700;
         }
         
         .actors-container {
@@ -146,6 +149,8 @@
             border-top: 4px solid var(--secondary);
             transition: all 0.3s ease;
             height: 100%;
+            display: flex;
+            flex-direction: column;
         }
         
         .actor-card:hover {
@@ -157,6 +162,11 @@
             color: var(--secondary);
             margin-bottom: 10px;
             font-size: 1.1rem;
+            font-weight: 700;
+        }
+        
+        .actor-card p {
+            flex-grow: 1;
         }
         
         .timeline-container {
@@ -229,6 +239,7 @@
             color: var(--primary-dark);
             margin-bottom: 8px;
             font-size: 1.2rem;
+            font-weight: 700;
         }
         
         .timeline-content .actors {
@@ -261,6 +272,7 @@
             font-size: 1.1rem;
             display: flex;
             align-items: center;
+            font-weight: 600;
         }
         
         .phase-details h5 i {
@@ -386,6 +398,74 @@
             margin-top: 8px;
             font-size: 0.9rem;
             color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background-color: var(--light-bg);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            min-width: 150px;
+            margin: 10px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .stat-card h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--primary-dark);
+        }
+        
+        .stat-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .chart-container {
+            height: 250px;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .chart-legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .chart-legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
         }
         
         @media (max-width: 768px) {
@@ -447,6 +527,29 @@
                     <p>Um funcionário, simulando um clique em um e-mail de phishing, desencadeia a execução de um ransomware na rede corporativa. O malware começa a se espalhar rapidamente, criptografando arquivos em servidores críticos.</p>
                 </div>
             </div>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <h3>6</h3>
+                    <p>Atores Envolvidos</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-tasks"></i>
+                    <h3>13</h3>
+                    <p>Fases do Incidente</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-clock"></i>
+                    <h3 id="ttrValue">--</h3>
+                    <p>Tempo de Resposta</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3 id="efficacyValue">--</h3>
+                    <p>Eficácia do Processo</p>
+                </div>
+            </div>
         </section>
         
         <section class="section">
@@ -468,12 +571,8 @@
                     <p>Responsável pela documentação, registro formal do chamado mestre, comunicação interna e primeiro nível de atendimento</p>
                 </div>
                 <div class="actor-card">
-                    <h4><i class="fas fa-user-shield"></i> Líder da Equipe de Incidentes</h4>
-                    <p>Coordenador estratégico, mobiliza equipes e designa o responsável técnico</p>
-                </div>
-                <div class="actor-card">
                     <h4><i class="fas fa-clipboard-list"></i> Secretaria de TI</h4>
-                    <p>Comunicação executiva, registro de marcos temporais, decisões gerenciais</p>
+                    <p>Comunicação executiva, registro de marcos temporais, decisões gerenciais, mobilização de equipes e coordenação estratégica da resposta a incidentes</p>
                 </div>
                 <div class="actor-card">
                     <h4><i class="fas fa-tools"></i> ETIR (Equipe Técnica)</h4>
@@ -510,6 +609,11 @@
                     <span class="status-completed"></span>
                     <span>Concluído</span>
                 </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="phaseChart"></canvas>
+                <div class="chart-legend" id="chartLegend"></div>
             </div>
             
             <div class="timeline-container">
@@ -567,7 +671,7 @@
                                 <h5><i class="fas fa-tasks"></i> Ação:</h5>
                                 <ul>
                                     <li>Declarar formalmente o "estado de alerta"</li>
-                                    <li>Comunicar ao Líder da Equipe de Incidentes Graves</li>
+                                    <li>Comunicar à Secretaria de TI</li>
                                     <li>Informar a própria equipe para iniciar o registro</li>
                                 </ul>
                                 <h5><i class="fas fa-theater-masks"></i> Simulação:</h5>
@@ -606,8 +710,8 @@
                     <div class="timeline-item" data-phase="5">
                         <div class="timeline-content">
                             <h4>5. Mobilização e Designação de Responsável</h4>
-                            <div class="actors"><i class="fas fa-user-shield"></i> Líder da Equipe / <i class="fas fa-clipboard-list"></i> Secretaria de TI</div>
-                            <p>O Líder da Equipe de Incidentes Graves inicia a mobilização das equipes.</p>
+                            <div class="actors"><i class="fas fa-clipboard-list"></i> Secretaria de TI</div>
+                            <p>A Secretaria de TI inicia a mobilização das equipes e designa o responsável técnico.</p>
                             <div class="phase-details">
                                 <h5><i class="fas fa-tasks"></i> Ação:</h5>
                                 <ul>
@@ -746,7 +850,7 @@
                     <div class="timeline-item" data-phase="11">
                         <div class="timeline-content">
                             <h4>11. Fim da Contingência e Desmobilização</h4>
-                            <div class="actors"><i class="fas fa-tools"></i> ETIR / <i class="fas fa-clipboard-list"></i> Secretaria / <i class="fas fa-user-shield"></i> Líder</div>
+                            <div class="actors"><i class="fas fa-tools"></i> ETIR / <i class="fas fa-clipboard-list"></i> Secretaria de TI</div>
                             <p>A ETIR declara o fim do evento de contingência e as equipes são desmobilizadas.</p>
                             <div class="phase-details">
                                 <h5><i class="fas fa-tasks"></i> Ação:</h5>
@@ -758,7 +862,7 @@
                                 <ul>
                                     <li>ETIR declara "Fim do evento de contingência"</li>
                                     <li>Secretaria de TI inicia "Desmobilizar equipe de sustentação"</li>
-                                    <li>Líder da Equipe declara fim do "estado de alerta"</li>
+                                    <li>Secretaria de TI declara fim do "estado de alerta"</li>
                                 </ul>
                             </div>
                         </div>
@@ -819,6 +923,10 @@
                     Próxima Fase
                     <i class="fas fa-arrow-right"></i>
                 </button>
+                <button class="control-btn" id="completePhase">
+                    <i class="fas fa-check"></i>
+                    Marcar como Concluída
+                </button>
                 <button class="control-btn" id="resetSimulation">
                     <i class="fas fa-redo"></i>
                     Reiniciar Simulação
@@ -832,21 +940,153 @@
             const timelineItems = document.querySelectorAll('.timeline-item');
             const prevBtn = document.getElementById('prevPhase');
             const nextBtn = document.getElementById('nextPhase');
+            const completeBtn = document.getElementById('completePhase');
             const resetBtn = document.getElementById('resetSimulation');
             const progressBar = document.getElementById('progressBar');
             const progressText = document.getElementById('progressText');
+            const ttrValue = document.getElementById('ttrValue');
+            const efficacyValue = document.getElementById('efficacyValue');
             let currentPhase = 0;
+            let completedPhases = 0;
+            let startTime = null;
+            let timerInterval = null;
+            
+            // Inicializar gráfico de fases
+            const ctx = document.getElementById('phaseChart').getContext('2d');
+            const phaseChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Concluído', 'Em Andamento', 'Não Iniciado'],
+                    datasets: [{
+                        data: [0, 1, 12],
+                        backgroundColor: [
+                            '#00c853',  // verde para concluído
+                            '#ffab00',  // amarelo para em andamento
+                            '#e0e0e0'   // cinza para não iniciado
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true
+                    }
+                }
+            });
+            
+            // Criar legenda personalizada
+            const chartLegend = document.getElementById('chartLegend');
+            const legendItems = [
+                { color: '#00c853', label: 'Concluído' },
+                { color: '#ffab00', label: 'Em Andamento' },
+                { color: '#e0e0e0', label: 'Não Iniciado' }
+            ];
+            
+            legendItems.forEach(item => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'chart-legend-item';
+                
+                const colorBox = document.createElement('div');
+                colorBox.className = 'chart-legend-color';
+                colorBox.style.backgroundColor = item.color;
+                
+                const label = document.createElement('span');
+                label.textContent = item.label;
+                
+                legendItem.appendChild(colorBox);
+                legendItem.appendChild(label);
+                chartLegend.appendChild(legendItem);
+            });
             
             // Inicializar todos os itens como não iniciados
             timelineItems.forEach(item => {
                 item.classList.add('not-started');
             });
             
+            // Iniciar timer
+            function startTimer() {
+                startTime = new Date();
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+            
+            // Parar timer
+            function stopTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+            }
+            
+            // Atualizar timer
+            function updateTimer() {
+                if (startTime) {
+                    const now = new Date();
+                    const diff = now - startTime;
+                    const minutes = Math.floor(diff / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    ttrValue.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                }
+            }
+            
+            // Atualizar métricas
+            function updateMetrics() {
+                // Atualizar eficácia
+                const efficacy = Math.round((completedPhases / timelineItems.length) * 100);
+                efficacyValue.textContent = `${efficacy}%`;
+            }
+            
+            // Atualizar gráfico
+            function updateChart() {
+                // Contar fases concluídas
+                let completedCount = 0;
+                for (let i = 0; i < currentPhase; i++) {
+                    if (timelineItems[i].classList.contains('completed')) {
+                        completedCount++;
+                    }
+                }
+                
+                // Atualizar dados do gráfico
+                phaseChart.data.datasets[0].data = [
+                    completedCount, 
+                    timelineItems[currentPhase].classList.contains('completed') ? 0 : 1, 
+                    timelineItems.length - completedCount - (timelineItems[currentPhase].classList.contains('completed') ? 0 : 1)
+                ];
+                
+                // Forçar atualização do gráfico com animação
+                phaseChart.update('active');
+            }
+            
             // Atualizar barra de progresso
             function updateProgressBar() {
                 const progress = ((currentPhase + 1) / timelineItems.length) * 100;
                 progressBar.style.width = `${progress}%`;
                 progressText.textContent = `Fase ${currentPhase + 1} de ${timelineItems.length} (${progress.toFixed(1)}%)`;
+                
+                // Atualizar gráfico
+                updateChart();
+                
+                // Atualizar métricas
+                updateMetrics();
             }
             
             // Ativar fase
@@ -891,6 +1131,37 @@
                 }
             }
             
+            // Marcar fase atual como concluída
+            function completeCurrentPhase() {
+                if (currentPhase < timelineItems.length) {
+                    // Iniciar timer na primeira conclusão
+                    if (completedPhases === 0) {
+                        startTimer();
+                    }
+                    
+                    timelineItems[currentPhase].classList.remove('active');
+                    timelineItems[currentPhase].classList.add('completed');
+                    completedPhases++;
+                    
+                    // Atualizar gráfico imediatamente
+                    updateChart();
+                    
+                    // Avançar para a próxima fase se houver
+                    if (currentPhase < timelineItems.length - 1) {
+                        activatePhase(currentPhase + 1);
+                    } else {
+                        // Última fase concluída
+                        stopTimer();
+                        updateProgressBar();
+                        
+                        // Mostrar mensagem de conclusão
+                        setTimeout(() => {
+                            alert('Simulação concluída com sucesso! Todas as fases foram finalizadas.');
+                        }, 500);
+                    }
+                }
+            }
+            
             // Event listeners para botões
             prevBtn.addEventListener('click', function() {
                 if (currentPhase > 0) {
@@ -904,9 +1175,17 @@
                 }
             });
             
+            completeBtn.addEventListener('click', completeCurrentPhase);
+            
             resetBtn.addEventListener('click', function() {
-                currentPhase = 0;
-                activatePhase(0);
+                if (confirm('Tem certeza que deseja reiniciar a simulação?')) {
+                    currentPhase = 0;
+                    completedPhases = 0;
+                    stopTimer();
+                    ttrValue.textContent = '--';
+                    efficacyValue.textContent = '--';
+                    activatePhase(0);
+                }
             });
             
             // Event listeners para itens da timeline
