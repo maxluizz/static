@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrossel Completo: Simulação de Incidente de Ransomware</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0a2463, #1e50a2);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            padding: 10px;
+        }
+        .carousel-container {
+            width: 100%;
+            max-width: 720px;
+            min-height: auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .carousel-header {
+            padding: 20px;
+            background: rgba(13, 71, 161, 0.3);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        .carousel-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+        .carousel-subtitle {
+            font-size: 14px;
+            color: #b3e5fc;
+        }
+        .carousel-content {
+            position: relative;
+            height: 600px;
+            overflow: hidden;
+        }
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            padding: 30px 20px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+        .card.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .card.prev {
+            transform: translateX(-100%);
+        }
+        .card-header {
+            padding: 0 0 20px 0;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        .actor-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .actor-icon {
+            background: #0d47a1;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+        }
+        .actor-icon i {
+            font-size: 30px;
+            color: #4fc3f7;
+        }
+        .actor-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+        .actor-subtitle {
+            font-size: 14px;
+            color: #b3e5fc;
+            margin-top: 4px;
+        }
+        .card-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .action-section {
+            margin-bottom: 20px;
+        }
+        .action-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #4fc3f7;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        .action-title i {
+            margin-right: 10px;
+            font-size: 22px;
+        }
+        .action-description {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #e1f5fe;
+            margin-bottom: 16px;
+        }
+        .action-details {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 16px;
+        }
+        .detail-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .detail-item:last-child {
+            margin-bottom: 0;
+        }
+        .detail-icon {
+            background: #0d47a1;
+            color: #ffffff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .detail-icon i {
+            font-size: 16px;
+        }
+        .detail-text {
+            font-size: 15px;
+            line-height: 1.4;
+        }
+        .highlight {
+            color: #81d4fa;
+            font-weight: 500;
+        }
+        .card-footer {
+            padding: 15px 20px;
+            background: rgba(13, 71, 161, 0.2);
+            font-size: 14px;
+            color: #b3e5fc;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .nav-button i {
+            margin: 0 4px;
+            font-size: 14px;
+        }
+        .nav-button.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .card-number {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(13, 71, 161, 0.6);
+            color: #ffffff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .badge {
+            position: absolute;
+            top: 55px;
+            right: 15px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        .badge i {
+            margin-right: 4px;
+            font-size: 12px;
+        }
+        .badge-warning {
+            background: #f44336;
+            color: #ffffff;
+        }
+        .badge-escalation {
+            background: #ff9800;
+            color: #ffffff;
+        }
+        .badge-critical {
+            background: #f44336;
+            color: #ffffff;
+        }
+        .badge-protocol {
+            background: #2196f3;
+            color: #ffffff;
+        }
+        .badge-etir {
+            background: #00897b;
+            color: #ffffff;
+        }
+        .badge-evaluation {
+            background: #ff9800;
+            color: #ffffff;
+        }
+        .badge-communication {
+            background: #2196f3;
+            color: #ffffff;
+        }
+        .badge-director {
+            background: #9c27b0;
+            color: #ffffff;
+        }
+        .badge-parallel {
+            background: #009688;
+            color: #ffffff;
+        }
+        .badge-resolution {
+            background: #00897b;
+            color: #ffffff;
+        }
+        .badge-end {
+            background: #4caf50;
+            color: #ffffff;
+        }
+        .badge-completion {
+            background: #4caf50;
+            color: #ffffff;
+        }
+        .progress-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 100%;
+            margin-top: 10px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #4fc3f7;
+            width: 8.33%; /* 100% / 12 cards */
+            transition: width 0.5s ease-in-out;
+        }
+        .decision-box, .alert-box, .success-box, .priority-box, .report-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+        }
+        .decision-box {
+            border-color: rgba(244, 67, 54, 0.3);
+            background: rgba(244, 67, 54, 0.1);
+        }
+        .alert-box {
+            border-color: rgba(33, 150, 243, 0.3);
+            background: rgba(33, 150, 243, 0.1);
+        }
+        .success-box {
+            border-color: rgba(76, 175, 80, 0.3);
+            background: rgba(76, 175, 80, 0.1);
+        }
+        .priority-box {
+            border-color: rgba(244, 67, 54, 0.3);
+            background: rgba(244, 67, 54, 0.1);
+        }
+        .report-box {
+            border-color: rgba(156, 39, 176, 0.3);
+            background: rgba(156, 39, 176, 0.1);
+        }
+        .box-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+        .decision-box .box-icon {
+            background: #f44336;
+        }
+        .alert-box .box-icon {
+            background: #2196f3;
+        }
+        .success-box .box-icon {
+            background: #4caf50;
+        }
+        .priority-box .box-icon {
+            background: #f44336;
+        }
+        .report-box .box-icon {
+            background: #9c27b0;
+        }
+        .box-icon i {
+            font-size: 20px;
+            color: #ffffff;
+        }
+        .box-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: #ffffff;
+            line-height: 1.4;
+        }
+        .box-text strong {
+            font-weight: 700;
+        }
+        .decision-box .box-text strong {
+            color: #ff8a80;
+        }
+        .alert-box .box-text strong {
+            color: #81d4fa;
+        }
+        .success-box .box-text strong {
+            color: #a5d6a7;
+        }
+        .priority-box .box-text strong {
+            color: #ff8a80;
+        }
+        .report-box .box-text strong {
+            color: #ce93d8;
+        }
+        .escalation-flow, .communication-flow, .flow-diagram {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+            position: relative;
+            flex-wrap: wrap;
+        }
+        .flow-line {
+            position: absolute;
+            top: 25px;
+            left: 15%;
+            right: 15%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: 1;
+        }
+        .flow-step, .comm-entity, .flow-branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 30%;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+        }
+        .step-circle, .entity-circle, .branch-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #0d47a1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .step-circle i, .entity-circle i, .branch-circle i {
+            font-size: 20px;
+            color: #4fc3f7;
+        }
+        .step-text, .entity-text, .branch-text {
+            text-align: center;
+            font-size: 12px;
+            color: #e1f5fe;
+            line-height: 1.3;
+        }
+        .team-meeting {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .team-member {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 22%;
+            margin-bottom: 15px;
+        }
+        .member-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #0d47a1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .member-avatar i {
+            font-size: 20px;
+            color: #4fc3f7;
+        }
+        .member-title {
+            text-align: center;
+            font-size: 12px;
+            color: #e1f5fe;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+        .containment-actions, .phases-container, .tracks-container, .lanes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .action-step, .phase, .track, .lane {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: flex-start;
+        }
+        .step-icon, .phase-icon, .track-icon, .lane-icon {
+            background: #0d47a1;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+        .step-icon i, .phase-icon i, .track-icon i, .lane-icon i {
+            font-size: 20px;
+            color: #4fc3f7;
+        }
+        .step-content, .phase-content, .track-content, .lane-content {
+            flex-grow: 1;
+        }
+        .step-title, .phase-title, .track-title, .lane-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #4fc3f7;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .step-title i, .phase-title i, .track-title i, .lane-title i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        .step-description, .phase-description, .lane-description {
+            font-size: 14px;
+            line-height: 1.4;
+            color: #e1f5fe;
+            margin-bottom: 8px;
+        }
+        .track-description {
+            margin-bottom: 0;
+        }
+        .track-actions, .lane-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .action-tag {
+            background: rgba(0, 150, 136, 0.2);
+            border: 1px solid rgba(0, 150, 136, 0.4);
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: #b2dfdb;
+            display: flex;
+            align-items: center;
+        }
+        .action-tag i {
+            margin-right: 4px;
+            font-size: 10px;
+        }
+        .checklist {
+            margin-top: 12px;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .checklist-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #a5d6a7;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .checklist-title i {
+            margin-right: 6px;
+        }
+        .checklist-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .checklist-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 12px;
+            color: #e1f5fe;
+            display: flex;
+            align-items: center;
+        }
+        .checklist-item i {
+            color: #4caf50;
+            margin-right: 6px;
+            font-size: 12px;
+        }
+        .timeline {
+            position: relative;
+            margin-top: 16px;
+            padding-left: 24px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 12px;
+        }
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -24px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00897b;
+            border: 2px solid #0d47a1;
+        }
+        .timeline-content {
+            background: rgba(0, 137, 123, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .timeline-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #4db6ac;
+            margin-bottom: 4px;
+        }
+        .timeline-description {
+            font-size: 12px;
+            color: #e1f5fe;
+            line-height: 1.3;
+        }
+        .status-box, .completion-status {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .status-item {
+            width: 48%;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        .status-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4caf50;
+            margin-bottom: 4px;
+        }
+        .status-label {
+            font-size: 12px;
+            color: #b3e5fc;
+        }
+        .flow-main {
+            width: 80px;
+            height: 80px;
+            background: rgba(13, 71, 161, 0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 2;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            margin: 0 auto 16px;
+        }
+        .flow-main i {
+            font-size: 24px;
+            color: #4fc3f7;
+            margin-bottom: 4px;
+        }
+        .flow-main-text {
+            font-size: 10px;
+            color: #ffffff;
+            text-align: center;
+            font-weight: 500;
+        }
+        .flow-branches {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+        .flow-branch {
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 150, 136, 0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .flow-branch i {
+            font-size: 18px;
+            color: #b2dfdb;
+            margin-bottom: 2px;
+        }
+        .flow-branch-text {
+            font-size: 9px;
+            color: #ffffff;
+            text-align: center;
+            font-weight: 500;
+            padding: 0 3px;
+        }
+        
+        /* Media queries para responsividade */
+        @media (max-width: 640px) {
+            .carousel-container {
+                border-radius: 16px;
+            }
+            .carousel-header {
+                padding: 15px;
+            }
+            .carousel-title {
+                font-size: 20px;
+            }
+            .carousel-subtitle {
+                font-size: 12px;
+            }
+            .carousel-content {
+                height: 500px;
+            }
+            .card {
+                padding: 20px 15px;
+            }
+            .actor-icon {
+                width: 50px;
+                height: 50px;
+                margin-right: 12px;
+            }
+            .actor-icon i {
+                font-size: 24px;
+            }
+            .actor-title {
+                font-size: 18px;
+            }
+            .actor-subtitle {
+                font-size: 12px;
+            }
+            .action-title {
+                font-size: 16px;
+            }
+            .action-title i {
+                font-size: 18px;
+            }
+            .action-description {
+                font-size: 14px;
+            }
+            .detail-item {
+                margin-bottom: 10px;
+            }
+            .detail-text {
+                font-size: 13px;
+            }
+            .step-circle, .entity-circle, .branch-circle {
+                width: 40px;
+                height: 40px;
+            }
+            .step-circle i, .entity-circle i, .branch-circle i {
+                font-size: 16px;
+            }
+            .step-text, .entity-text, .branch-text {
+                font-size: 10px;
+            }
+            .team-member {
+                width: 48%;
+            }
+            .member-avatar {
+                width: 40px;
+                height: 40px;
+            }
+            .member-avatar i {
+                font-size: 16px;
+            }
+            .member-title {
+                font-size: 10px;
+            }
+            .step-icon, .phase-icon, .track-icon, .lane-icon {
+                width: 32px;
+                height: 32px;
+            }
+            .step-icon i, .phase-icon i, .track-icon i, .lane-icon i {
+                font-size: 16px;
+            }
+            .step-title, .phase-title, .track-title, .lane-title {
+                font-size: 14px;
+            }
+            .step-description, .phase-description, .lane-description {
+                font-size: 12px;
+            }
+            .box-icon {
+                width: 32px;
+                height: 32px;
+            }
+            .box-icon i {
+                font-size: 16px;
+            }
+            .box-text {
+                font-size: 13px;
+            }
+            .decision-box, .alert-box, .success-box, .priority-box, .report-box {
+                padding: 12px;
+                flex-direction: column;
+                text-align: center;
+            }
+            .box-icon {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            .status-item {
+                width: 100%;
+            }
+            .flow-main {
+                width: 60px;
+                height: 60px;
+            }
+            .flow-main i {
+                font-size: 20px;
+            }
+            .flow-branches {
+                padding: 0 20px;
+            }
+            .flow-branch {
+                width: 50px;
+                height: 50px;
+            }
+            .flow-branch i {
+                font-size: 14px;
+            }
+            .card-footer {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .nav-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="carousel-container">
+        <div class="carousel-header">
+            <h1 class="carousel-title">Simulação de Incidente: Ataque de Ransomware</h1>
+            <p class="carousel-subtitle">Carrossel de Resposta a Incidentes de Segurança</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+        </div>
+        
+        <div class="carousel-content">
+            <!-- Card 1: Detecção Inicial -->
+            <div class="card active" id="card1">
+                <div class="card-number">1</div>
+                <div class="badge badge-warning">
+                    <i class="fas fa-exclamation-triangle"></i> Alerta Crítico
+                </div>
+                
+                <div class="card-header">
+                    <div class="actor-section">
+                        <div class="actor-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div>
+                            <h1 class="actor-title">Usuários e Ferramentas de Segurança</h1>
+                            <p class="actor-subtitle">Primeiros a detectar o ataque</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <div class="action-section">
+                        <h2 class="action-title">
+                            <i class="fas fa-search"></i>
+                            Detecção Inicial
+                        </h2>
+                        <p class="action-description">
+                            Um funcionário clica em um link malicioso de phishing, desencadeando um ransomware que se espalha rapidamente pela rede corporativa, criptografando arquivos críticos.
+                        </p>
+                        
+                        <div class="action-details">
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Relatos dos usuários:</span> Não conseguem abrir arquivos, recebendo mensagens de erro sobre arquivos corrompidos ou inacessíveis
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Alertas das ferramentas:</span> SIEM, XDR e EPM disparam alertas críticos sobre atividade de criptografia em massa e detecção de assinaturas de ransomware conhecidas
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Evidências:</span> Notas de resgate deixadas pelos atacantes em cada servidor afetado
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-server"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Sistemas impactados:</span> Servidores de arquivos, bancos de dados e sistemas críticos tornados inacessíveis
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 2: Escalonamento -->
+            <div class="card" id="card2">
+                <div class="card-number">2</div>
+                <div class="badge badge-escalation">
+                    <i class="fas fa-exclamation-triangle"></i> Escalonamento
+                </div>
+                
+                <div class="card-header">
+                    <div class="actor-section">
+                        <div class="actor-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <div>
+                            <h1 class="actor-title">Central de Serviços</h1>
+                            <p class="actor-subtitle">Primeiro nível de atendimento e identificação de padrões</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <div class="action-section">
+                        <h2 class="action-title">
+                            <i class="fas fa-level-up-alt"></i>
+                            Escalonamento
+                        </h2>
+                        <p class="action-description">
+                            A equipe de Primeiro Nível de Atendimento recebe um volume anormal de chamados sobre o mesmo problema, identificando um padrão que indica um ataque cibernético em larga escala.
+                        </p>
+                        
+                        <div class="action-details">
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-phone-volume"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Volume anormal de chamados:</span> Usuários relatando consistentemente os mesmos sintomas de arquivos inacessíveis
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Identificação de padrão:</span> O Líder da equipe correlaciona os chamados com os alertas de segurança
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-bell"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Decisão crítica:</span> Imediato escalonamento para a Chefia da Central de Serviços, reportando suspeita de ataque
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="escalation-flow">
+                            <div class="flow-line"></div>
+                            <div class="flow-step">
+                                <div class="step-circle">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="step-text">Usuários afetados</div>
+                            </div>
+                            <div class="flow-step">
+                                <div class="step-circle">
+                                    <i class="fas fa-headset"></i>
+                                </div>
+                                <div class="step-text">Central de Serviços</div>
+                            </div>
+                            <div class="flow-step">
+                                <div class="step-circle">
+                                    <i class="fas fa-user-tie"></i>
+                                </div>
+                                <div class="step-text">Chefia da Central</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 3: Confirmação do Incidente Grave -->
+            <div class="card" id="card3">
+                <div class="card-number">3</div>
+                <div class="badge badge-critical">
+                    <i class="fas fa-exclamation-circle"></i> Incidente Grave
+                </div>
+                
+                <div class="card-header">
+                    <div class="actor-section">
+                        <div class="actor-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div>
+                            <h1 class="actor-title">Chefia da Central de Serviços</h1>
+                            <p class="actor-subtitle">Avaliação e confirmação da gravidade</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <div class="action-section">
+                        <h2 class="action-title">
+                            <i class="fas fa-check-circle"></i>
+                            Confirmação do Incidente Grave
+                        </h2>
+                        <p class="action-description">
+                            Ao receber o escalonamento e verificar os detalhes, a Chefia da Central de Serviços confirma que arquivos estão sendo criptografados e classifica o evento como um incidente grave / exceção.
+                        </p>
+                        
+                        <div class="action-details">
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-clipboard-check"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Verificação dos detalhes:</span> Análise dos chamados e correlação com os alertas de segurança
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-file-lock"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Confirmação da criptografia:</span> Evidências concretas de que arquivos estão sendo criptografados em massa
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Classificação do evento:</span> Incidente grave / exceção devido ao impacto operacional e perda de dados
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-box">
+                            <div class="box-icon">
+                                <i class="fas fa-gavel"></i>
+                            </div>
+                            <div class="box-text">
+                                Gateway: <strong>"Incidente potencialmente grave de segurança?"</strong><br>
+                                Decisão: <strong>SIM</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 4: Acionamento do Protocolo -->
+            <div class="card" id="card4">
+                <div class="card-number">4</div>
+                <div class="badge badge-protocol">
+                    <i class="fas fa-cogs"></i> Protocolo Ativado
+                </div>
+                
+                <div class="card-header">
+                    <div class="actor-section">
+                        <div class="actor-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div>
+                            <h1 class="actor-title">Chefia da Central de Serviços</h1>
+                            <p class="actor-subtitle">Coordenação do protocolo de resposta</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <div class="action-section">
+                        <h2 class="action-title">
+                            <i class="fas fa-bell"></i>
+                            Acionamento do Protocolo
+                        </h2>
+                        <p class="action-description">
+                            Após confirmar o incidente grave, a Chefia da Central de Serviços ativa o protocolo de resposta a incidentes, emitindo um comunicado de alerta e convocando uma reunião com os líderes das equipes-chave.
+                        </p>
+                        
+                        <div class="action-details">
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-bullhorn"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Comunicado de alerta minimalista:</span> Emissão de comunicação inicial sobre o incidente em andamento
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Reunião convocada:</span> Líderes das equipes de Segurança da Informação, Infraestrutura, Redes e Comunicação
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-user-cog"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Designação de interlocutor:</span> O Secretário de TI designa um ponto focal para comunicação com as demais áreas
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="team-meeting">
+                            <div class="team-member">
+                                <div class="member-avatar">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="member-title">Segurança da Informação</div>
+                            </div>
+                            <div class="team-member">
+                                <div class="member-avatar">
+                                    <i class="fas fa-server"></i>
+                                </div>
+                                <div class="member-title">Infraestrutura</div>
+                            </div>
+                            <div class="team-member">
+                                <div class="member-avatar">
+                                    <i class="fas fa-network-wired"></i>
+                                </div>
+                                <div class="member-title">Redes</div>
+                            </div>
+                            <div class="team-member">
+                                <div class="member-avatar">
+                                    <i class="fas fa-comments"></i>
+                                </div>
+                                <div class="member-title">Comunicação</div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <div class="box-icon">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div class="box-text">
+                                <strong>Ação prioritária:</strong> Estabelecer comunicação clara e coordenada entre todas as equipes envolvidas na resposta ao incidente
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 5: Medidas Iniciais de Tratamento -->
+            <div class="card" id="card5">
+                <div class="card-number">5</div>
+                <div class="badge badge-etir">
+                    <i class="fas fa-shield-alt"></i> ETIR
+                </div>
+                
+                <div class="card-header">
+                    <div class="actor-section">
+                        <div class="actor-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div>
+                            <h1 class="actor-title">ETIR</h1>
+                            <p class="actor-subtitle">Equipe de Tratamento de Incidentes de Rede</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <div class="action-section">
+                        <h2 class="action-title">
+                            <i class="fas fa-first-aid"></i>
+                            Medidas Iniciais de Tratamento
+                        </h2>
+                        <p class="action-description">
+                            A ETIR inicia as medidas de contenção para interromper a propagação do ransomware e limitar os danos aos sistemas corporativos.
+                        </p>
+                        
+                        <div class="action-details">
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Foco principal:</span> Contenção do ataque para evitar maior propagação do ransomware
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Resposta rápida:</span> Ações imediatas são críticas para minimizar o impacto do ataque
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="containment-actions">
+                            <div class="action-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-laptop"></i>
+                                </div>
+                                <div class="step-content">
+                                    <div class="step-title">Instrução aos Usuários</div>
+                                    <div class="step-description">
+                                        Comunicar para que todos desliguem ou desconectem seus computadores da rede para conter a propagação
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="action-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-user-lock"></i>
+                                </div>
+                                <div class="step-content">
+                                    <div class="step-title">Bloqueio de Contas</div>
+                                    <div class="step-description">
+                                        Iniciar o procedimento para desativar contas de usuários que possam estar sendo usadas para a propagação
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="priority-box">
+                            <div class="box-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div class="box-text">
+                                <strong>Prioridade máxima:</strong> Isolar sistemas críticos e backups para preservar a capacidade de recuperação
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 6: Avaliação da Criticidade -->
+            <div class="card" id="card6">
+                <div class="card-number">6</div>
+                <div class="badge badge-evaluation">
+                    <i class="fas fa-clipboard-check"></i> Avaliação
+                </div>
+                
+                <div class="card-header">
+                    <div class="actor-section">
+                        <div class="actor-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div>
+                            <h1 class="actor-title">ETIR e Segurança</h1>
+                            <p class="actor-subtitle">Análise técnica e avaliação de impacto</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <div class="action-section">
+                        <h2 class="action-title">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Avaliação da Criticidade
+                        </h2>
+                        <p class="action-description">
+                            A equipe de Segurança da Informação realiza uma análise completa para entender o incidente, determinar as medidas de mitigação necessárias e avaliar o impacto nos sistemas críticos.
+                        </p>
+                        
+                        <div class="action-details">
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Análise das descobertas:</span> Investigação completa para entender a extensão e natureza do incidente
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-tools"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Medidas de mitigação:</span> Determinação das ações necessárias para conter e resolver o incidente
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="impact-assessment" style="display: flex; justify-content: space-between; margin-top: 16px; flex-wrap: wrap;">
+                            <div class="impact-item" style="width: 30%; background: rgba(255, 152, 0, 0.1); border: 2px solid rgba(255, 152, 0, 0.3); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 10px;">
+                                <div class="impact-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #ff9800; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                    <i class="fas fa-bug" style="font-size: 20px; color: #ffffff;"></i>
+                                </div>
+                                <div class="impact-title" style="font-size: 14px; font-weight: 700; color: #ffcc80; margin-bottom: 4px;">Causa</div>
+                                <div class="impact-description" style="font-size: 12px; color: #e1f5fe; line-height: 1.3;">
+                                    Ataque de ransomware via phishing
+                                </div>
+                            </div>
+                            <div class="impact-item" style="width: 30%; background: rgba(255, 152, 0, 0.1); border: 2px solid rgba(255, 152, 0, 0.3); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 10px;">
+                                <div class="impact-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #ff9800; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                    <i class="fas fa-database" style="font-size: 20px; color: #ffffff;"></i>
+                                </div>
+                                <div class="impact-title" style="font-size: 14px; font-weight: 700; color: #ffcc80; margin-bottom: 4px;">Impacto</div>
+                                <div class="impact-description" style="font-size: 12px; color: #e1f5fe; line-height: 1.3;">
+                                    Criptografia de dados críticos e indisponibilidade de sistemas essenciais
+                                </div>
+                            </div>
+                            <div class="impact-item" style="width: 30%; background: rgba(255, 152, 0, 0.1); border: 2px solid rgba(255, 152, 0, 0.3); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 10px;">
+                                <div class="impact-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #ff9800; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                    <i class="fas fa-signal" style="font-size: 20px; color: #ffffff;"></i>
+                                </div>
+                                <div class="impact-title" style="font-size: 14px; font-weight: 700; color: #ffcc80; margin-bottom: 4px;">Sistemas Afetados</div>
+                                <div class="impact-description" style="font-size: 12px; color: #e1f5fe; line-height: 1.3;">
+                                    Servidores de aplicação, login e arquivos
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="criticality-box">
+                            <div class="box-icon">
+                                <i class="fas fa-skull-crossbones"></i>
+                            </div>
+                            <div class="box-text">
+                                Nível de criticidade: <strong>MÁXIMA</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 7: Comunicação da Avaliação -->
+            <div class="card" id="card7">
+                <div class="card-number">7</div>
+                <div class="badge badge-communication">
+                    <i class="fas fa-comments"></i> Comunicação
+                </div>
+                
+                <div class="card-header">
+                    <div class="actor-section">
+                        <div class="actor-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div>
+                            <h1 class="actor-title">ETIR e Chefia da Central de Serviços</h1>
+                            <p class="actor-subtitle">Compartilhamento de informações e tomada de decisão</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <div class="action-section">
+                        <h2 class="action-title">
+                            <i class="fas fa-exchange-alt"></i>
+                            Comunicação da Avaliação
+                        </h2>
+                        <p class="action-description">
+                            O resultado da avaliação técnica é comunicado à Secretaria de TI, que analisa as informações e confirma a decisão de manter o incidente em estado de exceção devido à gravidade extrema.
+                        </p>
+                        
+                        <div class="action-details">
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Informar resultado da avaliação:</span> A ETIR comunica os resultados da análise técnica à Secretaria de TI
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Analisar resultado da avaliação:</span> A Secretaria de TI examina os detalhes do impacto e as recomendações técnicas
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Confirmação de gravidade:</span> A decisão é mantida devido à perda de dados e impacto operacional crítico
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="communication-flow">
+                            <div class="flow-line"></div>
+                            <div class="comm-entity">
+                                <div class="entity-circle">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <div class="entity-text">ETIR</div>
+                            </div>
+                            <div class="comm-entity">
+                                <div class="entity-circle">
+                                    <i class="fas fa-file-contract"></i>
+                                </div>
+                                <div class="entity-text">Relatório de Avaliação</div>
+                            </div>
+                            <div class="comm-entity">
+                                <div class="entity-circle">
+                                    <i class="fas fa-user-tie"></i>
+                                </div>
+                                <div class="entity-text">Secretaria de TI</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-box">
+                            <div class="box-icon">
+                                <i class="fas fa-gavel"></i>
+                            </div>
+                            <div class="box-text">
+                                <strong>Decisão confirmada:</strong> Manter o incidente em estado de exceção devido à gravidade extrema
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 8: Ciência ao Gabinete da DG -->
+            <div class="card" id="card8">
+                <div class="card-number">8</div>
+                <div class="badge badge-director">
+                    <i class="fas fa-building"></i> Diretoria
+                </div>
+                
+                <div class="card-header">
+                    <div class="actor-section">
+                        <div class="actor-icon">
+                            <i class="fas fa-laptop-house"></i>
+                        </div>
+                        <div>
+                            <h1 class="actor-title">Secretaria de TI</h1>
+                            <p class="actor-subtitle">Comunicação estratégica com a alta direção</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <div class="action-section">
+                        <h2 class="action-title">
+                            <i class="fas fa-bullhorn"></i>
+                            Ciência ao Gabinete da DG
+                        </h2>
+                        <p class="action-description">
+                            O secretário de TI executa a ação de informar a diretoria sobre o ataque de ransomware, detalhando os sistemas impactados e as ações de contenção em andamento.
+                        </p>
+                        
+                        <div class="action-details">
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Relato detalhado:</span> Informações sobre o tipo de ataque (ransomware), origem (phishing) e extensão do comprometimento
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-server"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Sistemas impactados:</span> Lista completa dos servidores, aplicações e serviços afetados pela criptografia
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="detail-text">
+                                    <span class="highlight">Ações de contenção:</span> Medidas já implementadas e em andamento para isolar o problema e evitar maior propagação
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="communication-diagram">
+                            <div class="flow-line"></div>
+                            <div class="comm-entity">
+                                <div class="entity-circle">
+                                    <i class="fas fa-laptop-house"></i>
+                                </div>
+                                <div class="entity-text">Secretaria de TI</div>
+                            </div>
+                            <div class="comm-entity">
+                                <div class="entity-circle">
+                                    <i class="fas fa-file-contract"></i>
+                                </div>
+                                <div class="entity-text">Relatório de Crise</div>
+                            </div>
+                            <div class="comm-entity">
+                                <div class="entity-circle">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="entity-text">Gabinete da DG</div>
+                            </div>
+                        </div>
+                        
+                        <div class="report-box">
+                            <div class="box-icon">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div class="box-text">
+                                <strong>Objetivo:</strong> Manter a alta direção informada para apoiar decisões estratégicas e alocação de recursos necessários para a recuperação
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 9: Divisão do Fluxo -->
+            <div class="card" id="card9">
+                <div class="card-number">9</div>
+                <div class="badge badge-parallel">
+                    <i class="fas fa-code-branch"></i> Trilhas Paralelas
+                </div>
+                
+                <div class="card-header">
+                    <div class="actor-section">
+                        <div class="actor-icon">
+                            <i class="fas fa-sitemap"></i>
+                        </div>
+                        <div>
+                            <h1 class="actor-title">Divisão do Fluxo</h1>
+                            <p class="actor-subtitle">Três trilhas de ação simultâneas</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <div class="action-section">
+                        <h2 class="action-title">
+                            <i class="fas fa-code-branch"></i>
+                            Início das Ações Paralelas
+                        </h2>
+                        <p class="action-description">
+                            Após a comunicação inicial, o processo se divide em três trilhas paralelas de ação, cada uma com responsabilidades específicas para lidar com diferentes aspectos do incidente.
+                        </p>
+                        
+                        <div class="flow-diagram">
+                            <div class="flow-main">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <div class="flow-main-text">Incidente de Ransomware</div>
+                            </div>
+                            <div class="flow-branches">
+                                <div class="flow-branch">
+                                    <i class="fas fa-clipboard-list"></i>
+                                    <div class="flow-branch-text">Registro e Acompanhamento</div>
+                                </div>
+                                <div class="flow-branch">
+                                    <i class="fas fa-briefcase"></i>
+                                    <div class="flow-branch-text">Gestão Executiva</div>
+                                </div>
+                                <div class="flow-branch">
+                                    <i class="fas fa-tools"></i>
+                                    <div class="flow-branch-text">Mobilização Técnica</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tracks-container">
+                            <div class="track">
+                                <div class="track-icon">
+                                    <i class="fas fa-clipboard-list"></i>
+                                </div>
+                                <div class="track-content">
+                                    <h3 class="track-title">
+                                        <i class="fas fa-headset"></i>
+                                        Trilha 1: Registro e Acompanhamento
+                                    </h3>
+                                    <p class="track-description">
+                                        Central de Serviços (CS) oficialmente declara o incidente, cria um chamado mestre e ativa a comunicação de crise para manter a alta gestão informada.
+                                    </p>
+                                    <div class="track-actions">
+                                        <div class="action-tag">
+                                            <i class="fas fa-check-circle"></i>
+                                            Incidente declarado
+                                        </div>
+                                        <div class="action-tag">
+                                            <i class="fas fa-clipboard"></i>
+                                            Chamado mestre
+                                        </div>
+                                        <div class="action-tag">
+                                            <i class="fas fa-comments"></i>
+                                            Comunicação de crise
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="track">
+                                <div class="track-icon">
+                                    <i class="fas fa-briefcase"></i>
+                                </div>
+                                <div class="track-content">
+                                    <h3 class="track-title">
+                                        <i class="fas fa-building"></i>
+                                        Trilha 2: Gestão Executiva
+                                    </h3>
+                                    <p class="track-description">
+                                        Gabinete da DG inicia análise de impacto financeiro e de reputação, avaliação do seguro cibernético e análise jurídica sobre notificações obrigatórias.
+                                    </p>
+                                    <div class="track-actions">
+                                        <div class="action-tag">
+                                            <i class="fas fa-chart-line"></i>
+                                            Análise de impacto
+                                        </div>
+                                        <div class="action-tag">
+                                            <i class="fas fa-shield-alt"></i>
+                                            Seguro cibernético
+                                        </div>
+                                        <div class="action-tag">
+                                            <i class="fas fa-balance-scale"></i>
+                                            Avaliação jurídica
+                                        </div>
+                                        <div class="action-tag">
+                                            <i class="fas fa-comments"></i>
+                                            Comunicação com interlocutor
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="track">
+                                <div class="track-icon">
+                                    <i class="fas fa-tools"></i>
+                                </div>
+                                <div class="track-content">
+                                    <h3 class="track-title">
+                                        <i class="fas fa-laptop-house"></i>
+                                        Trilha 3: Mobilização Técnica
+                                    </h3>
+                                    <p class="track-description">
+                                        Secretaria de TI mobiliza a ETIR e equipes técnicas, emitindo comunicação aos setores com instruções claras para isolamento da rede e preservação de evidências.
+                                    </p>
+                                    <div class="track-actions">
+                                        <div class="action-tag">
+                                            <i class="fas fa-users-cog"></i>
+                                            Mobilização de equipes
+                                        </div>
+                                        <div class="action-tag">
+                                            <i class="fas fa-network-wired"></i>
+                                            Isolamento da rede
+                                        </div>
+                                        <div class="action-tag">
+                                            <i class="fas fa-database"></i>
+                                            Preservação de evidências
+                                        </div>
+                                        <div class="action-tag">
+                                            <i class="fas fa-bullhorn"></i>
+                                            Comunicação aos setores
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 10: Resolução Técnica -->
+            <div class="card" id="card10">
+                <div class="card-number">10</div>
+                <div class="badge badge-resolution">
+                    <i class="fas fa-tools"></i> Resolução Técnica
+                </div>
+                
+                <div class="card-header">
+                    <div class="actor-section">
+                        <div class="actor-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div>
+                            <h1 class="actor-title">ETIR</h1>
+                            <p class="actor-subtitle">Equipe de Tratamento de Incidentes de Rede</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <div class="action-section">
+                        <h2 class="action-title">
+                            <i class="fas fa-tools"></i>
+                            Resolução Técnica
+                        </h2>
+                        <p class="action-description">
+                            A equipe inicia a tarefa "Resolver incidente", que se desdobra em várias fases técnicas para conter, identificar, erradicar e recuperar os sistemas afetados pelo ransomware.
+                        </p>
+                        
+                        <div class="phases-container">
+                            <div class="phase">
+                                <div class="phase-icon">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="phase-content">
+                                    <h3 class="phase-title">
+                                        <i class="fas fa-lock"></i>
+                                        Contenção
+                                    </h3>
+                                    <p class="phase-description">
+                                        Isolar os segmentos de rede afetados para impedir que o ransomware continue a se espalhar. Desconectar sistemas críticos e bloquear comunicações maliciosas.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="phase">
+                                <div class="phase-icon">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <div class="phase-content">
+                                    <h3 class="phase-title">
+                                        <i class="fas fa-bug"></i>
+                                        Identificação
+                                    </h3>
+                                    <p class="phase-description">
+                                        Analisar o malware para identificar a variante do ransomware e possíveis vulnerabilidades que foram exploradas. Coletar evidências forenses para análise posterior.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="phase">
+                                <div class="phase-icon">
+                                    <i class="fas fa-trash-alt"></i>
+                                </div>
+                                <div class="phase-content">
+                                    <h3 class="phase-title">
+                                        <i class="fas fa-broom"></i>
+                                        Erradicação
+                                    </h3>
+                                    <p class="phase-description">
+                                        Remover o malware de todos os sistemas infectados, corrigir as vulnerabilidades exploradas e eliminar mecanismos de persistência deixados pelos atacantes.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="phase">
+                                <div class="phase-icon">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <div class="phase-content">
+                                    <h3 class="phase-title">
+                                        <i class="fas fa-sync-alt"></i>
+                                        Recuperação
+                                    </h3>
+                                    <p class="phase-description">
+                                        Após 3h de tentativas, caso não seja possível isolar completamente o problema, iniciar o processo de restauração dos dados a partir de <span class="highlight">backups seguros e testados</span> (off-line e imutáveis). Os sistemas são restaurados em um ambiente limpo e isolado antes de serem reintroduzidos na rede.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <h4 class="timeline-title">Horário 0:00</h4>
+                                    <p class="timeline-description">Início do processo de contenção e isolamento dos sistemas afetados</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <h4 class="timeline-title">Horário 1:00</h4>
+                                    <p class="timeline-description">Análise do malware e identificação da variante de ransomware</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <h4 class="timeline-title">Horário 2:00</h4>
+                                    <p class="timeline-description">Início do processo de erradicação do malware e correção de vulnerabilidades</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <h4 class="timeline-title">Horário 3:00</h4>
+                                    <p class="timeline-description"><span class="highlight">Ponto de decisão:</span> Iniciar restauração a partir de backups devido à persistência do ataque</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 11: Fim da Contingência e Desmobilização -->
+            <div class="card" id="card11">
+                <div class="card-number">11</div>
+                <div class="badge badge-end">
+                    <i class="fas fa-check-circle"></i> Fim da Contingência
+                </div>
+                
+                <div class="card-header">
+                    <div class="actor-section">
+                        <div class="actor-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div>
+                            <h1 class="actor-title">ETIR e Secretaria TI</h1>
+                            <p class="actor-subtitle">Encerramento da resposta ao incidente</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <div class="action-section">
+                        <h2 class="action-title">
+                            <i class="fas fa-flag-checkered"></i>
+                            Fim da Contingência e Desmobilização
+                        </h2>
+                        <p class="action-description">
+                            Após a restauração e validação dos sistemas e dados mais críticos, a equipe técnica declara o fim do estado de contingência e inicia o processo de desmobilização.
+                        </p>
+                        
+                        <div class="phases-container">
+                            <div class="phase">
+                                <div class="phase-icon">
+                                    <i class="fas fa-check-double"></i>
+                                </div>
+                                <div class="phase-content">
+                                    <h3 class="phase-title">
+                                        <i class="fas fa-clipboard-check"></i>
+                                        Declaração do Fim da Contingência
+                                    </h3>
+                                    <p class="phase-description">
+                                        A equipe técnica declara o <span class="highlight">"Fim do estado de contingência"</span> após a confirmação de que os sistemas e dados críticos foram restaurados e validados com sucesso.
+                                    </p>
+                                    
+                                    <div class="checklist">
+                                        <div class="checklist-title">
+                                            <i class="fas fa-tasks"></i> Critérios de Validação
+                                        </div>
+                                        <div class="checklist-items">
+                                            <div class="checklist-item">
+                                                <i class="fas fa-check"></i> Servidores críticos operacionais
+                                            </div>
+                                            <div class="checklist-item">
+                                                <i class="fas fa-check"></i> Dados restaurados com integridade
+                                            </div>
+                                            <div class="checklist-item">
+                                                <i class="fas fa-check"></i> Vulnerabilidades corrigidas
+                                            </div>
+                                            <div class="checklist-item">
+                                                <i class="fas fa-check"></i> Redes seguras e monitoradas
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="phase">
+                                <div class="phase-icon">
+                                    <i class="fas fa-users-cog"></i>
+                                </div>
+                                <div class="phase-content">
+                                    <h3 class="phase-title">
+                                        <i class="fas fa-sitemap"></i>
+                                        Desmobilização da Equipe
+                                    </h3>
+                                    <p class="phase-description">
+                                        A Secretaria de TI começa a <span class="highlight">"Desmobilizar equipe de sustentação"</span>, realocando os recursos para as atividades finais de validação e normalização.
+                                    </p>
+                                    
+                                    <div class="status-box">
+                                        <div class="status-item">
+                                            <div class="status-value">100%</div>
+                                            <div class="status-label">Sistemas Críticos Restaurados</div>
+                                        </div>
+                                        <div class="status-item">
+                                            <div class="status-value">75%</div>
+                                            <div class="status-label">Equipe Desmobilizada</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="phase">
+                                <div class="phase-icon">
+                                    <i class="fas fa-clipboard-list"></i>
+                                </div>
+                                <div class="phase-content">
+                                    <h3 class="phase-title">
+                                        <i class="fas fa-file-alt"></i>
+                                        Preparação para Encerramento
+                                    </h3>
+                                    <p class="phase-description">
+                                        Inicia-se a preparação para o encerramento formal do incidente, com a compilação de todos os registros, ações tomadas e lições aprendidas durante a resposta ao incidente.
+                                    </p>
+                                    
+                                    <div class="checklist">
+                                        <div class="checklist-title">
+                                            <i class="fas fa-tasks"></i> Atividades Finais
+                                        </div>
+                                        <div class="checklist-items">
+                                            <div class="checklist-item">
+                                                <i class="fas fa-check"></i> Documentação completa do incidente
+                                            </div>
+                                            <div class="checklist-item">
+                                                <i class="fas fa-check"></i> Análise de causa raiz
+                                            </div>
+                                            <div class="checklist-item">
+                                                <i class="fas fa-check"></i> Relatório de lições aprendidas
+                                            </div>
+                                            <div class="checklist-item">
+                                                <i class="fas fa-check"></i> Plano de melhorias de segurança
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 12: Encerramento do Incidente -->
+            <div class="card" id="card12">
+                <div class="card-number">12</div>
+                <div class="badge badge-completion">
+                    <i class="fas fa-check-circle"></i> Incidente Resolvido
+                </div>
+                
+                <div class="card-header">
+                    <div class="actor-section">
+                        <div class="actor-icon">
+                            <i class="fas fa-flag-checkered"></i>
+                        </div>
+                        <div>
+                            <h1 class="actor-title">Encerramento do Incidente</h1>
+                            <p class="actor-subtitle">Finalização em múltiplas raias</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <div class="action-section">
+                        <h2 class="action-title">
+                            <i class="fas fa-tasks"></i>
+                            Conclusão do Processo
+                        </h2>
+                        <p class="action-description">
+                            Após a resolução técnica e recuperação dos sistemas, o incidente é formalmente encerrado em todas as raias envolvidas, com ações específicas para cada área e planejamento de melhorias futuras.
+                        </p>
+                        
+                        <div class="lanes-container">
+                            <div class="lane">
+                                <div class="lane-icon">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <div class="lane-content">
+                                    <h3 class="lane-title">
+                                        <i class="fas fa-laptop-house"></i>
+                                        ETIR/Secretaria TI
+                                    </h3>
+                                    <p class="lane-description">
+                                        Status <span class="highlight">"Incidente grave / exceção resolvido"</span> é alcançado após confirmação de que todos os serviços essenciais estão operacionais e seguros.
+                                    </p>
+                                    <div class="lane-actions">
+                                        <div class="action-tag">
+                                            <i class="fas fa-check-circle"></i>
+                                            Serviços operacionais
+                                        </div>
+                                        <div class="action-tag">
+                                            <i class="fas fa-shield-alt"></i>
+                                            Ambiente seguro
+                                        </div>
+                                        <div class="action-tag">
+                                            <i class="fas fa-file-alt"></i>
+                                            Documentação final
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="lane">
+                                <div class="lane-icon">
+                                    <i class="fas fa-headset"></i>
+                                </div>
+                                <div class="lane-content">
+                                    <h3 class="lane-title">
+                                        <i class="fas fa-users"></i>
+                                        Central de Serviços
+                                    </h3>
+                                    <p class="lane-description">
+                                        Comunica aos usuários a restauração dos serviços, inicia o processo de reset de senhas e alcança o <span class="highlight">"Fim do incidente grave de segurança resolvido"</span>.
+                                    </p>
+                                    <div class="lane-actions">
+                                        <div class="action-tag">
+                                            <i class="fas fa-bullhorn"></i>
+                                            Comunicação aos usuários
+                                        </div>
+                                        <div class="action-tag">
+                                            <i class="fas fa-key"></i>
+                                            Reset de senhas
+                                        </div>
+                                        <div class="action-tag">
+                                            <i class="fas fa-clipboard-list"></i>
+                                            Lições aprendidas
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="lane">
+                                <div class="lane-icon">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="lane-content">
+                                    <h3 class="lane-title">
+                                        <i class="fas fa-landmark"></i>
+                                        Gabinete da DG
+                                    </h3>
+                                    <p class="lane-description">
+                                        Recebe a confirmação da resolução e emite sua <span class="highlight">"Resposta ao protocolo de comunicação"</span>, que pode incluir um comunicado oficial para a imprensa.
+                                    </p>
+                                    <div class="lane-actions">
+                                        <div class="action-tag">
+                                            <i class="fas fa-check-circle"></i>
+                                            Confirmação de resolução
+                                        </div>
+                                        <div class="action-tag">
+                                            <i class="fas fa-newspaper"></i>
+                                            Comunicado oficial
+                                        </div>
+                                        <div class="action-tag">
+                                            <i class="fas fa-flag-checkered"></i>
+                                            Encerramento do acompanhamento
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="completion-status">
+                            <div class="status-item">
+                                <div class="status-value">100%</div>
+                                <div class="status-label">Sistemas Restaurados</div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-value">100%</div>
+                                <div class="status-label">Equipes Desmobilizadas</div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-value">100%</div>
+                                <div class="status-label">Incidente Encerrado</div>
+                            </div>
+                        </div>
+                        
+                        <div class="success-box">
+                            <div class="box-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div class="box-text">
+                                <strong>Próximos passos:</strong> Reunião de lições aprendidas para analisar a causa raiz e implementar melhorias nas defesas contra ataques futuros
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-footer">
+            <button class="nav-button" id="prevBtn" onclick="changeCard(-1)">
+                <i class="fas fa-chevron-left"></i> Anterior
+            </button>
+            <span id="cardInfo">Card 1 de 12 - Simulação de Incidente de Ransomware</span>
+            <button class="nav-button" id="nextBtn" onclick="changeCard(1)">
+                Próximo <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentCard = 1;
+        const totalCards = 12;
+        
+        function showCard(cardNumber) {
+            // Hide all cards
+            document.querySelectorAll('.card').forEach(card => {
+                card.classList.remove('active');
+                card.classList.remove('prev');
+            });
+            
+            // Show current card
+            const currentCardElement = document.getElementById(`card${cardNumber}`);
+            currentCardElement.classList.add('active');
+            
+            // Add prev class to previous card for animation
+            if (cardNumber > 1) {
+                const prevCardElement = document.getElementById(`card${cardNumber - 1}`);
+                prevCardElement.classList.add('prev');
+            }
+            
+            // Update progress bar
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${(cardNumber / totalCards) * 100}%`;
+            
+            // Update card info
+            document.getElementById('cardInfo').textContent = `Card ${cardNumber} de ${totalCards} - Simulação de Incidente de Ransomware`;
+            
+            // Update navigation buttons
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            if (cardNumber === 1) {
+                prevBtn.classList.add('disabled');
+            } else {
+                prevBtn.classList.remove('disabled');
+            }
+            
+            if (cardNumber === totalCards) {
+                nextBtn.classList.add('disabled');
+            } else {
+                nextBtn.classList.remove('disabled');
+            }
+        }
+        
+        function changeCard(direction) {
+            const newCard = currentCard + direction;
+            
+            if (newCard >= 1 && newCard <= totalCards) {
+                currentCard = newCard;
+                showCard(currentCard);
+            }
+        }
+        
+        // Initialize the first card
+        showCard(currentCard);
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowLeft') {
+                changeCard(-1);
+            } else if (event.key === 'ArrowRight') {
+                changeCard(1);
+            }
+        });
+        
+        // Touch swipe support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', function(event) {
+            touchStartX = event.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', function(event) {
+            touchEndX = event.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                // Swipe left
+                changeCard(1);
+            }
+            
+            if (touchEndX > touchStartX + 50) {
+                // Swipe right
+                changeCard(-1);
+            }
+        }
+    </script>
+</body>
+</html>
