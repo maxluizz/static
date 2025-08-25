@@ -21,17 +21,19 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden;
+            /* Removido overflow: hidden para permitir scroll quando necessário */
             padding: 10px;
         }
         .carousel-container {
             width: 100%;
             max-width: 720px;
-            min-height: auto;
+            /* Alterado de min-height: auto para height: auto para permitir expansão */
+            height: auto;
+            max-height: 95vh; /* Limitar altura máxima para não ultrapassar a tela */
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 24px;
-            overflow: hidden;
+            overflow: hidden; /* Mantido para evitar overflow interno */
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             display: flex;
             flex-direction: column;
@@ -42,6 +44,7 @@
             background: rgba(13, 71, 161, 0.3);
             border-bottom: 2px solid rgba(255, 255, 255, 0.1);
             text-align: center;
+            flex-shrink: 0; /* Impedir que o header encolha */
         }
         .carousel-title {
             font-size: 24px;
@@ -55,8 +58,11 @@
         }
         .carousel-content {
             position: relative;
-            height: 600px;
+            /* Alterado de height: 600px para min-height: 400px e max-height: 65vh */
+            min-height: 400px;
+            max-height: 65vh;
             overflow: hidden;
+            flex-grow: 1; /* Permitir que o conteúdo cresça para preencher o espaço disponível */
         }
         .card {
             position: absolute;
@@ -68,6 +74,7 @@
             transition: all 0.5s ease-in-out;
             display: flex;
             flex-direction: column;
+            overflow-y: auto; /* Permitir scroll dentro do card se necessário */
         }
         .card.active {
             opacity: 1;
@@ -80,6 +87,7 @@
             padding: 0 0 20px 0;
             border-bottom: 2px solid rgba(255, 255, 255, 0.1);
             margin-bottom: 20px;
+            flex-shrink: 0; /* Impedir que o header encolha */
         }
         .actor-section {
             display: flex;
@@ -118,6 +126,8 @@
             display: flex;
             flex-direction: column;
             overflow-y: auto;
+            /* Adicionado padding para garantir que o conteúdo não fique cortado na parte inferior */
+            padding-bottom: 20px;
         }
         .action-section {
             margin-bottom: 20px;
@@ -185,6 +195,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0; /* Impedir que o footer encolha */
         }
         .nav-button {
             background: rgba(255, 255, 255, 0.1);
@@ -197,6 +208,9 @@
             display: flex;
             align-items: center;
             font-size: 14px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
         }
         .nav-button:hover {
             background: rgba(255, 255, 255, 0.2);
@@ -208,6 +222,23 @@
         .nav-button.disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+        .nav-button:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: -1;
+            transition: all 0.3s ease;
+        }
+        .nav-button:hover:before {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .nav-button:active {
+            transform: scale(0.98);
         }
         .card-number {
             position: absolute;
@@ -693,14 +724,252 @@
             font-weight: 500;
             padding: 0 3px;
         }
+        .impact-assessment {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .impact-item {
+            width: 30%;
+            background: rgba(255, 152, 0, 0.1);
+            border: 2px solid rgba(255, 152, 0, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .impact-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ff9800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        .impact-icon i {
+            font-size: 20px;
+            color: #ffffff;
+        }
+        .impact-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffcc80;
+            margin-bottom: 4px;
+        }
+        .impact-description {
+            font-size: 12px;
+            color: #e1f5fe;
+            line-height: 1.3;
+        }
+        .communication-diagram {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+            position: relative;
+            flex-wrap: wrap;
+        }
+        .criticality-box {
+            background: rgba(244, 67, 54, 0.1);
+            border: 2px solid rgba(244, 67, 54, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+        }
+        .criticality-box .box-icon {
+            background: #f44336;
+        }
         
-        /* Media queries para responsividade */
+        /* Indicadores de slide para melhor navegação em dispositivos móveis */
+        .slide-indicators {
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+            gap: 8px;
+            background: rgba(13, 71, 161, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0; /* Impedir que os indicadores encolham */
+        }
+        
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .indicator.active {
+            background: #4fc3f7;
+        }
+        
+        /* Garantir que os botões de navegação estejam sempre visíveis */
+        .nav-button {
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: flex !important;
+        }
+        
+        .nav-button.disabled {
+            opacity: 0.5 !important;
+            cursor: not-allowed;
+        }
+        
+        /* Media queries para responsividade - MELHORADAS */
+        @media (max-width: 1200px) {
+            .carousel-container {
+                max-width: 90%;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .carousel-container {
+                max-width: 95%;
+            }
+            .carousel-content {
+                max-height: 60vh;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .carousel-container {
+                border-radius: 20px;
+                max-width: 100%;
+            }
+            .carousel-header {
+                padding: 15px;
+            }
+            .carousel-title {
+                font-size: 22px;
+            }
+            .carousel-subtitle {
+                font-size: 13px;
+            }
+            .carousel-content {
+                max-height: 55vh;
+                min-height: 350px;
+            }
+            .card {
+                padding: 25px 18px;
+            }
+            .actor-icon {
+                width: 55px;
+                height: 55px;
+                margin-right: 14px;
+            }
+            .actor-icon i {
+                font-size: 26px;
+            }
+            .actor-title {
+                font-size: 20px;
+            }
+            .actor-subtitle {
+                font-size: 13px;
+            }
+            .action-title {
+                font-size: 18px;
+            }
+            .action-title i {
+                font-size: 20px;
+            }
+            .action-description {
+                font-size: 15px;
+            }
+            .detail-item {
+                margin-bottom: 11px;
+            }
+            .detail-text {
+                font-size: 14px;
+            }
+            .step-circle, .entity-circle, .branch-circle {
+                width: 45px;
+                height: 45px;
+            }
+            .step-circle i, .entity-circle i, .branch-circle i {
+                font-size: 18px;
+            }
+            .step-text, .entity-text, .branch-text {
+                font-size: 11px;
+            }
+            .team-member {
+                width: 23%;
+            }
+            .member-avatar {
+                width: 45px;
+                height: 45px;
+            }
+            .member-avatar i {
+                font-size: 18px;
+            }
+            .member-title {
+                font-size: 11px;
+            }
+            .step-icon, .phase-icon, .track-icon, .lane-icon {
+                width: 36px;
+                height: 36px;
+            }
+            .step-icon i, .phase-icon i, .track-icon i, .lane-icon i {
+                font-size: 18px;
+            }
+            .step-title, .phase-title, .track-title, .lane-title {
+                font-size: 15px;
+            }
+            .step-description, .phase-description, .lane-description {
+                font-size: 13px;
+            }
+            .box-icon {
+                width: 36px;
+                height: 36px;
+            }
+            .box-icon i {
+                font-size: 18px;
+            }
+            .box-text {
+                font-size: 14px;
+            }
+            .flow-main {
+                width: 70px;
+                height: 70px;
+            }
+            .flow-main i {
+                font-size: 22px;
+            }
+            .flow-branches {
+                padding: 0 30px;
+            }
+            .flow-branch {
+                width: 55px;
+                height: 55px;
+            }
+            .flow-branch i {
+                font-size: 16px;
+            }
+            .impact-item {
+                width: 31%;
+            }
+            .slide-indicators {
+                padding: 8px 0;
+            }
+            .indicator {
+                width: 10px;
+                height: 10px;
+            }
+        }
+        
         @media (max-width: 640px) {
             .carousel-container {
                 border-radius: 16px;
             }
             .carousel-header {
-                padding: 15px;
+                padding: 12px;
             }
             .carousel-title {
                 font-size: 20px;
@@ -709,7 +978,8 @@
                 font-size: 12px;
             }
             .carousel-content {
-                height: 500px;
+                max-height: 50vh;
+                min-height: 320px;
             }
             .card {
                 padding: 20px 15px;
@@ -818,13 +1088,324 @@
             .flow-branch i {
                 font-size: 14px;
             }
+            .impact-item {
+                width: 48%;
+            }
             .card-footer {
                 flex-direction: column;
                 gap: 10px;
+                padding: 12px 15px;
             }
             .nav-button {
                 width: 100%;
                 justify-content: center;
+                padding: 10px 16px;
+                font-size: 16px;
+                min-height: 44px; /* Tamanho mínimo para toque */
+            }
+            .nav-button i {
+                font-size: 16px;
+            }
+            .flow-step, .comm-entity, .flow-branch {
+                width: 48%;
+            }
+            .flow-line {
+                left: 25%;
+                right: 25%;
+            }
+            .slide-indicators {
+                padding: 8px 0;
+            }
+            .indicator {
+                width: 10px;
+                height: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            .carousel-container {
+                border-radius: 12px;
+            }
+            .carousel-header {
+                padding: 10px;
+            }
+            .carousel-title {
+                font-size: 18px;
+            }
+            .carousel-subtitle {
+                font-size: 11px;
+            }
+            .carousel-content {
+                max-height: 45vh;
+                min-height: 300px;
+            }
+            .card {
+                padding: 15px 12px;
+            }
+            .actor-icon {
+                width: 45px;
+                height: 45px;
+                margin-right: 10px;
+            }
+            .actor-icon i {
+                font-size: 22px;
+            }
+            .actor-title {
+                font-size: 16px;
+            }
+            .actor-subtitle {
+                font-size: 11px;
+            }
+            .action-title {
+                font-size: 15px;
+            }
+            .action-title i {
+                font-size: 16px;
+            }
+            .action-description {
+                font-size: 13px;
+            }
+            .detail-item {
+                margin-bottom: 8px;
+                flex-direction: column;
+            }
+            .detail-icon {
+                margin-right: 0;
+                margin-bottom: 8px;
+            }
+            .detail-text {
+                font-size: 12px;
+            }
+            .step-circle, .entity-circle, .branch-circle {
+                width: 35px;
+                height: 35px;
+            }
+            .step-circle i, .entity-circle i, .branch-circle i {
+                font-size: 14px;
+            }
+            .step-text, .entity-text, .branch-text {
+                font-size: 9px;
+            }
+            .team-member {
+                width: 48%;
+            }
+            .member-avatar {
+                width: 35px;
+                height: 35px;
+            }
+            .member-avatar i {
+                font-size: 14px;
+            }
+            .member-title {
+                font-size: 9px;
+            }
+            .step-icon, .phase-icon, .track-icon, .lane-icon {
+                width: 28px;
+                height: 28px;
+            }
+            .step-icon i, .phase-icon i, .track-icon i, .lane-icon i {
+                font-size: 14px;
+            }
+            .step-title, .phase-title, .track-title, .lane-title {
+                font-size: 13px;
+            }
+            .step-description, .phase-description, .lane-description {
+                font-size: 11px;
+            }
+            .box-icon {
+                width: 28px;
+                height: 28px;
+            }
+            .box-icon i {
+                font-size: 14px;
+            }
+            .box-text {
+                font-size: 12px;
+            }
+            .flow-main {
+                width: 50px;
+                height: 50px;
+            }
+            .flow-main i {
+                font-size: 18px;
+            }
+            .flow-branches {
+                padding: 0 15px;
+            }
+            .flow-branch {
+                width: 45px;
+                height: 45px;
+            }
+            .flow-branch i {
+                font-size: 12px;
+            }
+            .impact-item {
+                width: 100%;
+            }
+            .flow-step, .comm-entity, .flow-branch {
+                width: 100%;
+            }
+            .flow-line {
+                display: none;
+            }
+            .escalation-flow, .communication-flow, .flow-diagram {
+                flex-direction: column;
+                align-items: center;
+            }
+            .card-number, .badge {
+                font-size: 10px;
+                padding: 2px 6px;
+            }
+            .card-number {
+                width: 26px;
+                height: 26px;
+                font-size: 14px;
+            }
+            .badge {
+                top: 45px;
+                padding: 2px 6px;
+            }
+            .badge i {
+                font-size: 10px;
+            }
+            .action-tag {
+                font-size: 10px;
+                padding: 2px 8px;
+            }
+            .action-tag i {
+                font-size: 8px;
+            }
+            .card-footer {
+                padding: 10px 12px;
+            }
+            .nav-button {
+                padding: 12px 16px;
+                font-size: 16px;
+                min-height: 48px; /* Tamanho mínimo para toque */
+            }
+            #cardInfo {
+                font-size: 12px;
+                margin: 5px 0;
+            }
+            .slide-indicators {
+                padding: 6px 0;
+            }
+            .indicator {
+                width: 12px;
+                height: 12px;
+            }
+        }
+        
+        @media (max-width: 320px) {
+            .carousel-title {
+                font-size: 16px;
+            }
+            .carousel-content {
+                max-height: 40vh;
+                min-height: 280px;
+            }
+            .card {
+                padding: 12px 10px;
+            }
+            .actor-icon {
+                width: 40px;
+                height: 40px;
+            }
+            .actor-icon i {
+                font-size: 20px;
+            }
+            .actor-title {
+                font-size: 15px;
+            }
+            .action-title {
+                font-size: 14px;
+            }
+            .action-description {
+                font-size: 12px;
+            }
+            .detail-text {
+                font-size: 11px;
+            }
+            .step-title, .phase-title, .track-title, .lane-title {
+                font-size: 12px;
+            }
+            .step-description, .phase-description, .lane-description {
+                font-size: 10px;
+            }
+            .box-text {
+                font-size: 11px;
+            }
+            .card-footer {
+                padding: 8px 10px;
+            }
+            .nav-button {
+                padding: 14px 16px;
+                font-size: 14px;
+                min-height: 48px; /* Tamanho mínimo para toque */
+            }
+            #cardInfo {
+                font-size: 11px;
+                margin: 4px 0;
+            }
+        }
+        
+        /* Melhorias de acessibilidade */
+        @media (prefers-reduced-motion: reduce) {
+            .card {
+                transition: none;
+            }
+            .progress-fill {
+                transition: none;
+            }
+        }
+        
+        /* Melhorias para orientação paisagem em dispositivos móveis */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .carousel-container {
+                max-height: 90vh;
+            }
+            .carousel-content {
+                max-height: 50vh;
+                min-height: 250px;
+            }
+            .card {
+                padding: 15px 12px;
+            }
+            .actor-icon {
+                width: 40px;
+                height: 40px;
+            }
+            .actor-icon i {
+                font-size: 20px;
+            }
+            .actor-title {
+                font-size: 16px;
+            }
+            .action-title {
+                font-size: 14px;
+            }
+            .action-description {
+                font-size: 12px;
+            }
+            .detail-text {
+                font-size: 11px;
+            }
+            .step-title, .phase-title, .track-title, .lane-title {
+                font-size: 12px;
+            }
+            .step-description, .phase-description, .lane-description {
+                font-size: 10px;
+            }
+            .card-footer {
+                padding: 8px 10px;
+            }
+            .nav-button {
+                padding: 8px 12px;
+                font-size: 12px;
+                min-height: 40px; /* Tamanho mínimo para toque */
             }
         }
     </style>
@@ -1285,31 +1866,31 @@
                             </div>
                         </div>
                         
-                        <div class="impact-assessment" style="display: flex; justify-content: space-between; margin-top: 16px; flex-wrap: wrap;">
-                            <div class="impact-item" style="width: 30%; background: rgba(255, 152, 0, 0.1); border: 2px solid rgba(255, 152, 0, 0.3); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 10px;">
-                                <div class="impact-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #ff9800; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
-                                    <i class="fas fa-bug" style="font-size: 20px; color: #ffffff;"></i>
+                        <div class="impact-assessment">
+                            <div class="impact-item">
+                                <div class="impact-icon">
+                                    <i class="fas fa-bug"></i>
                                 </div>
-                                <div class="impact-title" style="font-size: 14px; font-weight: 700; color: #ffcc80; margin-bottom: 4px;">Causa</div>
-                                <div class="impact-description" style="font-size: 12px; color: #e1f5fe; line-height: 1.3;">
+                                <div class="impact-title">Causa</div>
+                                <div class="impact-description">
                                     Ataque de ransomware via phishing
                                 </div>
                             </div>
-                            <div class="impact-item" style="width: 30%; background: rgba(255, 152, 0, 0.1); border: 2px solid rgba(255, 152, 0, 0.3); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 10px;">
-                                <div class="impact-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #ff9800; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
-                                    <i class="fas fa-database" style="font-size: 20px; color: #ffffff;"></i>
+                            <div class="impact-item">
+                                <div class="impact-icon">
+                                    <i class="fas fa-database"></i>
                                 </div>
-                                <div class="impact-title" style="font-size: 14px; font-weight: 700; color: #ffcc80; margin-bottom: 4px;">Impacto</div>
-                                <div class="impact-description" style="font-size: 12px; color: #e1f5fe; line-height: 1.3;">
+                                <div class="impact-title">Impacto</div>
+                                <div class="impact-description">
                                     Criptografia de dados críticos e indisponibilidade de sistemas essenciais
                                 </div>
                             </div>
-                            <div class="impact-item" style="width: 30%; background: rgba(255, 152, 0, 0.1); border: 2px solid rgba(255, 152, 0, 0.3); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 10px;">
-                                <div class="impact-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #ff9800; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
-                                    <i class="fas fa-signal" style="font-size: 20px; color: #ffffff;"></i>
+                            <div class="impact-item">
+                                <div class="impact-icon">
+                                    <i class="fas fa-signal"></i>
                                 </div>
-                                <div class="impact-title" style="font-size: 14px; font-weight: 700; color: #ffcc80; margin-bottom: 4px;">Sistemas Afetados</div>
-                                <div class="impact-description" style="font-size: 12px; color: #e1f5fe; line-height: 1.3;">
+                                <div class="impact-title">Sistemas Afetados</div>
+                                <div class="impact-description">
                                     Servidores de aplicação, login e arquivos
                                 </div>
                             </div>
@@ -2058,6 +2639,9 @@
             </div>
         </div>
         
+        <!-- Indicadores de slide para dispositivos móveis -->
+        <div class="slide-indicators" id="slideIndicators"></div>
+        
         <div class="card-footer">
             <button class="nav-button" id="prevBtn" onclick="changeCard(-1)">
                 <i class="fas fa-chevron-left"></i> Anterior
@@ -2068,10 +2652,22 @@
             </button>
         </div>
     </div>
-
+    
     <script>
         let currentCard = 1;
         const totalCards = 12;
+        
+        // Criar indicadores de slide para dispositivos móveis
+        function createSlideIndicators() {
+            const indicatorsContainer = document.getElementById('slideIndicators');
+            for (let i = 1; i <= totalCards; i++) {
+                const indicator = document.createElement('div');
+                indicator.classList.add('indicator');
+                if (i === 1) indicator.classList.add('active');
+                indicator.setAttribute('onclick', `goToCard(${i})`);
+                indicatorsContainer.appendChild(indicator);
+            }
+        }
         
         function showCard(cardNumber) {
             // Hide all cards
@@ -2112,6 +2708,9 @@
             } else {
                 nextBtn.classList.remove('disabled');
             }
+            
+            // Update slide indicators
+            updateSlideIndicators(cardNumber);
         }
         
         function changeCard(direction) {
@@ -2123,8 +2722,29 @@
             }
         }
         
-        // Initialize the first card
-        showCard(currentCard);
+        function goToCard(cardNumber) {
+            if (cardNumber >= 1 && cardNumber <= totalCards) {
+                currentCard = cardNumber;
+                showCard(currentCard);
+            }
+        }
+        
+        function updateSlideIndicators(activeCard) {
+            const indicators = document.querySelectorAll('.indicator');
+            indicators.forEach((indicator, index) => {
+                if (index + 1 === activeCard) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+            });
+        }
+        
+        // Initialize the first card and create slide indicators
+        document.addEventListener('DOMContentLoaded', function() {
+            createSlideIndicators();
+            showCard(currentCard);
+        });
         
         // Keyboard navigation
         document.addEventListener('keydown', function(event) {
@@ -2135,30 +2755,89 @@
             }
         });
         
-        // Touch swipe support for mobile
+        // Touch swipe support for mobile - MELHORADO
         let touchStartX = 0;
+        let touchStartY = 0;
         let touchEndX = 0;
+        let touchEndY = 0;
         
         document.addEventListener('touchstart', function(event) {
             touchStartX = event.changedTouches[0].screenX;
-        });
+            touchStartY = event.changedTouches[0].screenY;
+        }, { passive: true });
         
         document.addEventListener('touchend', function(event) {
             touchEndX = event.changedTouches[0].screenX;
+            touchEndY = event.changedTouches[0].screenY;
             handleSwipe();
-        });
+        }, { passive: true });
         
         function handleSwipe() {
-            if (touchEndX < touchStartX - 50) {
-                // Swipe left
-                changeCard(1);
-            }
+            // Calcular a diferença horizontal e vertical
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
             
-            if (touchEndX > touchStartX + 50) {
-                // Swipe right
-                changeCard(-1);
+            // Verificar se o movimento horizontal é maior que o vertical e se é significativo
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
+                if (deltaX < 0) {
+                    // Swipe left - próximo slide
+                    changeCard(1);
+                } else {
+                    // Swipe right - slide anterior
+                    changeCard(-1);
+                }
             }
         }
+        
+        // Melhorar a acessibilidade para navegação por teclado
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Tab') {
+                // Permitir navegação por tab normalmente
+                return;
+            }
+            
+            if (event.key === 'Enter' || event.key === ' ') {
+                // Se o foco estiver em um botão de navegação, permitir ativação
+                const activeElement = document.activeElement;
+                if (activeElement.id === 'prevBtn' || activeElement.id === 'nextBtn') {
+                    event.preventDefault();
+                    activeElement.click();
+                }
+            }
+        });
+        
+        // Adicionar suporte para gestos de pinça para zoom em dispositivos móveis
+        let initialPinchDistance = 0;
+        
+        document.addEventListener('touchstart', function(event) {
+            if (event.touches.length === 2) {
+                // Calcular a distância inicial entre dois dedos
+                const touch1 = event.touches[0];
+                const touch2 = event.touches[1];
+                initialPinchDistance = Math.hypot(
+                    touch2.clientX - touch1.clientX,
+                    touch2.clientY - touch1.clientY
+                );
+            }
+        }, { passive: true });
+        
+        document.addEventListener('touchmove', function(event) {
+            if (event.touches.length === 2) {
+                // Calcular a distância atual entre dois dedos
+                const touch1 = event.touches[0];
+                const touch2 = event.touches[1];
+                const currentPinchDistance = Math.hypot(
+                    touch2.clientX - touch1.clientX,
+                    touch2.clientY - touch1.clientY
+                );
+                
+                // Se a distância mudou significativamente, permitir o zoom padrão do navegador
+                if (Math.abs(currentPinchDistance - initialPinchDistance) > 10) {
+                    // Não previnir o comportamento padrão para permitir o zoom
+                    return;
+                }
+            }
+        }, { passive: true });
     </script>
 </body>
 </html>
